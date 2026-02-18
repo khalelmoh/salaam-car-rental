@@ -1,4 +1,5 @@
 import { Fuel, Gauge, Users, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Button from './Button';
 import './CarCard.css';
 
@@ -14,7 +15,31 @@ export interface CarProps {
     mpg: string;
 }
 
-const CarCard = ({ car }: { car: CarProps }) => {
+interface CarCardProps {
+    car: CarProps;
+    onViewDetails?: (carId: string) => void;
+    onBookNow?: (carId: string) => void;
+}
+
+const CarCard = ({ car, onViewDetails, onBookNow }: CarCardProps) => {
+    const navigate = useNavigate();
+
+    const handleViewDetails = () => {
+        if (onViewDetails) {
+            onViewDetails(car.id);
+            return;
+        }
+        navigate(`/fleet/${car.id}`);
+    };
+
+    const handleBookNow = () => {
+        if (onBookNow) {
+            onBookNow(car.id);
+            return;
+        }
+        navigate(`/bookings?carId=${car.id}`);
+    };
+
     return (
         <div className="car-card">
             <div className="car-image-container">
@@ -51,8 +76,8 @@ const CarCard = ({ car }: { car: CarProps }) => {
                 </div>
 
                 <div className="car-actions">
-                    <Button variant="outline" className="w-full">View Details</Button>
-                    <Button className="w-full">Book Now</Button>
+                    <Button variant="outline" className="w-full" onClick={handleViewDetails}>View Details</Button>
+                    <Button className="w-full" onClick={handleBookNow}>Book Now</Button>
                 </div>
             </div>
         </div>

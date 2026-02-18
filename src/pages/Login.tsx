@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Car, Lock, Mail } from 'lucide-react';
 import Button from '../components/Button';
+import { login } from '../lib/auth';
 import './Login.css';
 
 const Login = () => {
@@ -11,22 +12,24 @@ const Login = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!email.trim() || !password.trim()) {
+            setError('Email and password are required.');
+            return;
+        }
+
         setIsLoading(true);
         setError('');
 
-        // Simulate API call
-        setTimeout(() => {
-            if (email === 'admin@salaam.com' && password === 'admin') {
-                localStorage.setItem('isAuthenticated', 'true');
-                window.dispatchEvent(new Event('storage')); // Trigger update
-                navigate('/');
-            } else {
-                setError('Invalid credentials. Try admin@salaam.com / admin');
-                setIsLoading(false);
-            }
-        }, 1000);
+        try {
+            await login(email, password);
+            navigate('/');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Login failed.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

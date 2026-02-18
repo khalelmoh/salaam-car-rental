@@ -1,17 +1,54 @@
-import { useParams, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Check, Star } from 'lucide-react';
 import Button from '../components/Button';
-import { cars } from '../data/cars';
+import { api } from '../lib/api';
+import type { ManagedCar } from '../types/models';
 import './CarDetails.css';
 
 const CarDetails = () => {
+    const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const car = cars.find(c => c.id === id);
+    const [car, setCar] = useState<ManagedCar | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        const load = async () => {
+            if (!id) {
+                setError('Car ID is missing.');
+                setIsLoading(false);
+                return;
+            }
+            try {
+                setIsLoading(true);
+                const cars = await api.listCars();
+                const selected = cars.find((item) => item.id === id) || null;
+                setCar(selected);
+                if (!selected) {
+                    setError('Car not found');
+                }
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to load vehicle details.');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        load();
+    }, [id]);
+
+    if (isLoading) {
+        return (
+            <div className="container" style={{ padding: '4rem 0', textAlign: 'center' }}>
+                <h2>Loading vehicle details...</h2>
+            </div>
+        );
+    }
 
     if (!car) {
         return (
             <div className="container" style={{ padding: '4rem 0', textAlign: 'center' }}>
-                <h2>Car not found</h2>
+                <h2>{error || 'Car not found'}</h2>
                 <Link to="/fleet"><Button variant="outline">Back to Fleet</Button></Link>
             </div>
         );
@@ -25,12 +62,10 @@ const CarDetails = () => {
                 </Link>
 
                 <div className="details-grid">
-                    {/* Image Section */}
                     <div className="details-image">
                         <img src={car.image} alt={car.name} />
                     </div>
 
-                    {/* Info Section */}
                     <div className="details-info">
                         <div className="details-header">
                             <div>
@@ -45,7 +80,7 @@ const CarDetails = () => {
 
                         <div className="rating-row">
                             <div className="stars">
-                                {[1, 2, 3, 4, 5].map(star => (
+                                {[1, 2, 3, 4, 5].map((star) => (
                                     <Star key={star} size={16} fill="#d4af37" color="#d4af37" />
                                 ))}
                             </div>
@@ -83,7 +118,7 @@ const CarDetails = () => {
                         </div>
 
                         <div className="booking-actions">
-                            <Button size="lg" className="w-full">Book This Car</Button>
+                            <Button size="lg" className="w-full" onClick={() => navigate(`/bookings?carId=${car.id}`)}>Book This Car</Button>
                         </div>
                     </div>
                 </div>

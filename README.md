@@ -1,73 +1,80 @@
-# React + TypeScript + Vite
+# Salaam Car Rental - Production-Ready Full-Stack App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
+This project is now a full-stack car rental management system with:
+- API-backed authentication and session validation
+- Real backend CRUD for fleet, customers, bookings, transactions, and settings
+- Dashboard metrics and charts driven by live backend data
+- Form validation on both frontend and backend
+- Error/success/loading feedback across pages
+- Protected routes and logout flow
 
-Currently, two official plugins are available:
+Default login:
+- `admin@salaam.com`
+- `admin`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Architecture
+### Frontend (`src/`)
+- `pages/` feature pages: dashboard, fleet, bookings, customers, finance, settings, login
+- `components/` reusable UI modules
+- `lib/api.ts` API client with auth token handling
+- `lib/auth.ts` auth state helpers
+- `types/models.ts` shared app domain types
 
-## React Compiler
+### Backend (`backend/`)
+- `server.js` Node HTTP API server
+- `db.js` JSON file persistence layer
+- `db.json` persisted data store (seed + runtime data)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## API Endpoints
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `POST /api/auth/logout`
+- `GET /api/dashboard`
+- CRUD:
+  - `/api/cars`
+  - `/api/customers`
+  - `/api/bookings`
+  - `/api/transactions`
+- Settings:
+  - `GET /api/settings`
+  - `PUT /api/settings`
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Run Locally
+1. Install dependencies:
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. Start backend API:
+```bash
+npm run server
 ```
+
+3. In a second terminal, start frontend:
+```bash
+npm run dev
+```
+
+Frontend URL:
+- `http://localhost:5173`
+
+Backend URL:
+- `http://localhost:4000`
+
+## Build and Lint
+```bash
+npm run lint
+npm run build
+```
+
+## Environment Configuration
+Optional frontend API override:
+- `VITE_API_BASE_URL=http://localhost:4000/api`
+
+If omitted, frontend defaults to `http://localhost:4000/api`.
+
+## Notes
+- Data persists in `backend/db.json`.
+- Session tokens are persisted in `backend/db.json` and validated by `Authorization: Bearer <token>`.
+- The current implementation is modular and ready for migration from JSON persistence to a database layer (PostgreSQL/MySQL/MongoDB) without changing frontend contracts.

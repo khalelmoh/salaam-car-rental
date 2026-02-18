@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Car, CalendarRange, Users, Settings, LogOut, DollarSign } from 'lucide-react';
+import { logout } from '../lib/auth';
 import './Sidebar.css';
 
 const Sidebar = () => {
-    const handleLogout = () => {
+    const handleLogout = async () => {
         if (window.confirm('Are you sure you want to logout?')) {
-            localStorage.removeItem('isAuthenticated');
+            await logout();
             window.location.href = '/login';
         }
     };

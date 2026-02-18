@@ -1,0 +1,103 @@
+{
+  "users": [
+    {
+      "id": "USR-1001",
+      "email": "admin@salaam.com",
+      "password": "admin",
+      "role": "admin",
+      "name": "Admin User"
+    }
+  ],
+  "sessions": [],
+  "cars": [
+    {
+      "id": "1",
+      "name": "Toyota Camry",
+      "category": "Economy",
+      "image": "https://images.unsplash.com/photo-1621007947382-bb3c3968e3bb?auto=format&fit=crop&q=80&w=600",
+      "pricePerDay": 45,
+      "transmission": "Automatic",
+      "seats": 5,
+      "fuelType": "Hybrid",
+      "mpg": "52 MPG",
+      "status": "Available",
+      "licensePlate": "DXB-1423"
+    },
+    {
+      "id": "2",
+      "name": "BMW X5",
+      "category": "SUV",
+      "image": "https://images.unsplash.com/photo-1556189250-72ba9540536d?auto=format&fit=crop&q=80&w=600",
+      "pricePerDay": 85,
+      "transmission": "Automatic",
+      "seats": 5,
+      "fuelType": "Diesel",
+      "mpg": "26 MPG",
+      "status": "Rented",
+      "licensePlate": "DXB-3048"
+    },
+    {
+      "id": "3",
+      "name": "Mercedes-Benz S-Class",
+      "category": "Luxury",
+      "image": "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=600",
+      "pricePerDay": 150,
+      "transmission": "Automatic",
+      "seats": 5,
+      "fuelType": "Petrol",
+      "mpg": "22 MPG",
+      "status": "Maintenance",
+      "licensePlate": "DXB-5112"
+    }
+  ],
+  "customers": [
+    {
+      "id": "CUST-1001",
+      "fullName": "Ahmed Ali",
+      "phone": "+971 50 123 4567",
+      "email": "ahmed@example.com",
+      "nationalId": "784-1234-1234567-1",
+      "driverLicenseNumber": "DXB-98765",
+      "address": "Downtown Dubai, Boulevard Plaza"
+    },
+    {
+      "id": "CUST-1002",
+      "fullName": "Sarah Smith",
+      "phone": "+971 55 987 6543",
+      "email": "sarah@example.com",
+      "nationalId": "784-5678-7654321-2",
+      "driverLicenseNumber": "DXB-54321",
+      "address": "Dubai Marina, Marina Gate"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "BK-1001",
+      "carId": "1",
+      "customerId": "CUST-1001",
+      "startDate": "2026-02-20",
+      "endDate": "2026-02-22",
+      "totalAmount": 90,
+      "status": "reserved",
+      "paymentStatus": "pending"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "TRX-9812",
+      "date": "2026-02-15",
+      "description": "Rental: Toyota Camry (2 Days)",
+      "type": "Income",
+      "amount": 90,
+      "category": "Rental"
+    }
+  ],
+  "activities": [],
+  "settings": {
+    "companyName": "Salaam Car Rental",
+    "contactEmail": "admin@salaam.com",
+    "currency": "USD",
+    "taxRate": 5,
+    "bookingLeadHours": 2
+  }
+}

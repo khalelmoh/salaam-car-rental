@@ -26,6 +26,6 @@ export function addActivity(message: string, type = 'info') {
     window.dispatchEvent(new CustomEvent('activity-updated', { detail: act }));
 }
 
-export function dispatchDataUpdate(name: string, payload?: any) {
+export function dispatchDataUpdate(name: string, payload?: unknown) {
     window.dispatchEvent(new CustomEvent(`${name}-updated`, { detail: payload }));
 }

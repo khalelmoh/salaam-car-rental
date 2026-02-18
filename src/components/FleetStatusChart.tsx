@@ -1,12 +1,10 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-const data = [
-    { name: 'Available', value: 24, color: '#10b981' }, // Emerald 500
-    { name: 'Rented', value: 18, color: '#f59e0b' },    // Amber 500
-    { name: 'Maintenance', value: 5, color: '#ef4444' }, // Red 500
-];
+interface FleetStatusChartProps {
+    data: Array<{ name: string; value: number; color: string }>;
+}
 
-const FleetStatusChart = () => {
+const FleetStatusChart = ({ data }: FleetStatusChartProps) => {
     return (
         <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>

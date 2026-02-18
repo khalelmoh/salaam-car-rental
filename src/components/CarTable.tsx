@@ -1,17 +1,11 @@
 import { Edit, Trash2, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
-import type { CarProps } from '../components/CarCard'; // Reusing type
+import type { ManagedCar } from '../types/models';
 import './CarTable.css';
 
 interface CarTableProps {
-    cars: CarProps[];
-    onEdit: (car: CarProps) => void;
+    cars: ManagedCar[];
+    onEdit: (car: ManagedCar) => void;
     onDelete: (id: string) => void;
-}
-
-// Extended type for management
-export interface ManagedCar extends CarProps {
-    status: 'Available' | 'Rented' | 'Maintenance';
-    licensePlate: string;
 }
 
 const CarTable = ({ cars, onEdit, onDelete }: CarTableProps) => {
@@ -38,7 +32,7 @@ const CarTable = ({ cars, onEdit, onDelete }: CarTableProps) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {cars.map((car: any) => (
+                    {cars.map((car) => (
                         <tr key={car.id}>
                             <td>
                                 <div className="car-cell">

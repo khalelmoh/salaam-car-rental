@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
+import { useMemo } from 'react';
 import Sidebar from '../components/Sidebar';
+import { getStoredUser } from '../lib/auth';
 import './DashboardLayout.css';
 
 interface DashboardLayoutProps {
@@ -8,6 +10,8 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
+    const user = useMemo(() => getStoredUser(), []);
+
     return (
         <div className="dashboard-layout">
             <Sidebar />
@@ -16,7 +20,7 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
                     <h1>{title}</h1>
                     <div className="user-profile">
                         <div className="avatar">A</div>
-                        <span className="username">Admin User</span>
+                        <span className="username">{user?.name || 'Admin User'}</span>
                     </div>
                 </header>
                 <div className="dashboard-content">

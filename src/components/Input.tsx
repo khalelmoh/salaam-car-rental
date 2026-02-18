@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import './Input.css';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -13,7 +13,8 @@ const Input: React.FC<InputProps> = ({
     id,
     ...props
 }) => {
-    const inputId = id || props.name || Math.random().toString(36).substr(2, 9);
+    const generatedId = useId();
+    const inputId = id || props.name || generatedId;
 
     return (
         <div className={`input-group ${className}`}>
