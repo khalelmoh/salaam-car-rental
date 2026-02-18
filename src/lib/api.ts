@@ -32,7 +32,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  } catch {
+    throw new Error(
+      `Cannot reach API at ${API_BASE}. Start the backend server with "npm run server".`
+    );
+  }
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
