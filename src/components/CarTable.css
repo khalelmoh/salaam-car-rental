@@ -1,0 +1,119 @@
+.table-container {
+    background-color: var(--surface);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    overflow-x: auto;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.data-table th {
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 2px solid #e2e8f0;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.data-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: var(--text-main);
+    vertical-align: middle;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table tr:hover {
+    background-color: #f8fafc;
+}
+
+.car-cell {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.cell-image {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+}
+
+.cell-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.text-sm {
+    font-size: 0.8rem;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.badge-success {
+    background-color: #d1fae5;
+    color: #059669;
+}
+
+.badge-warning {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.badge-danger {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+}
+
+.action-btn.edit {
+    color: #3b82f6;
+}
+
+.action-btn.edit:hover {
+    background-color: #eff6ff;
+}
+
+.action-btn.delete {
+    color: #ef4444;
+}
+
+.action-btn.delete:hover {
+    background-color: #fef2f2;
+}

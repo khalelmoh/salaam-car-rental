@@ -1,0 +1,72 @@
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--background);
+}
+
+.dashboard-main {
+    flex: 1;
+    margin-left: 260px;
+    /* Sidebar width */
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-header {
+    height: 70px;
+    background-color: var(--surface);
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.dashboard-header h1 {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    background-color: var(--accent);
+    color: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.username {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.dashboard-content {
+    padding: 2rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    .dashboard-main {
+        margin-left: 0;
+    }
+
+    .sidebar {
+        /* Mobile behavior would need JS toggle, simplified for now */
+        display: none;
+    }
+}

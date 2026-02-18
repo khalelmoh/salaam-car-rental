@@ -1,0 +1,83 @@
+:root {
+  /* Salaam Professional Palette */
+  --primary: #047857;
+  /* Emerald 700 */
+  --primary-dark: #065f46;
+  /* Emerald 800 */
+  --primary-light: #10b981;
+  /* Emerald 500 */
+
+  --secondary: #1e293b;
+  /* Slate 800 */
+
+  --accent: #d97706;
+  /* Amber 600 */
+
+  --background: #f1f5f9;
+  /* Slate 100 */
+  --surface: #ffffff;
+
+  --text-main: #0f172a;
+  /* Slate 900 */
+  --text-muted: #64748b;
+  /* Slate 500 */
+  --text-light: #f8fafc;
+  /* Slate 50 */
+
+  --border: #e2e8f0;
+  /* Slate 200 */
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--background);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

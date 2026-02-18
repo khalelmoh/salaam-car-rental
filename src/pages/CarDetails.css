@@ -1,0 +1,159 @@
+.car-details-page {
+    padding: 2rem 0 4rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: var(--primary);
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.details-image {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.details-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 1.5rem;
+}
+
+.category-tag {
+    display: inline-block;
+    background: var(--background);
+    color: var(--text-muted);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.details-header h1 {
+    font-size: 2rem;
+    color: var(--primary);
+    line-height: 1.2;
+}
+
+.price-tag {
+    text-align: right;
+}
+
+.price-tag .amount {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.price-tag .period {
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.rating-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.rating-text {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.specs-list {
+    background: var(--background);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.spec-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.spec-row:last-child {
+    border-bottom: none;
+}
+
+.spec-row .label {
+    color: var(--text-muted);
+}
+
+.spec-row .value {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.features-section {
+    margin-bottom: 2rem;
+}
+
+.features-section h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.features-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.features-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-main);
+    font-size: 0.95rem;
+}
+
+.features-list li svg {
+    color: var(--accent);
+}
+
+@media (max-width: 900px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}

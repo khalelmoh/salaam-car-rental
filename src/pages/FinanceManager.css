@@ -1,0 +1,67 @@
+.finance-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    justify-content: flex-end;
+}
+
+.transaction-form-card {
+    background-color: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    animation: slideDown 0.3s ease-out;
+}
+
+.text-green {
+    color: #10b981;
+}
+
+.text-red {
+    color: #ef4444;
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* Print Styles */
+@media print {
+    body {
+        background-color: white;
+        color: black;
+    }
+
+    .no-print,
+    .sidebar,
+    .dashboard-header,
+    .finance-actions,
+    .action-btn {
+        display: none !important;
+    }
+
+    .dashboard-main {
+        margin-left: 0 !important;
+        padding: 0 !important;
+    }
+
+    .section-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+    }
+
+    .print-break-avoid {
+        break-inside: avoid;
+    }
+}
