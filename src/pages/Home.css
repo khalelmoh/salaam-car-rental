@@ -36,6 +36,13 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+.hero-logo {
+    width: min(300px, 80%);
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 1rem;
+}
+
 .hero-subtitle {
     font-size: 1.25rem;
     margin-bottom: 2rem;
@@ -181,6 +188,10 @@
 
     .hero-title {
         font-size: 2.5rem;
+    }
+
+    .hero-logo {
+        margin: 0 auto 1rem;
     }
 
     .hero-actions {

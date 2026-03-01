@@ -22,9 +22,13 @@ Default login:
 - `types/models.ts` shared app domain types
 
 ### Backend (`backend/`)
-- `server.js` Node HTTP API server
-- `db.js` JSON file persistence layer
-- `db.json` persisted data store (seed + runtime data)
+- `server/app.js` Express API server bootstrap
+- `server/routes/` route registration
+- `server/controllers/` request handlers
+- `server/middleware/` auth/RBAC/validation middleware
+- `server/services/` domain/security helpers
+- `server/db/` PostgreSQL pool, migrations, and legacy seed import
+- `db.json` one-time legacy seed source
 
 ## API Endpoints
 - `POST /api/auth/login`
@@ -46,12 +50,17 @@ Default login:
 npm install
 ```
 
-2. Start backend API:
+2. Configure PostgreSQL connection (choose one approach):
+- `DATABASE_URL=postgres://postgres:password@localhost:5432/salaam_car_rental`
+- or individual vars: `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`
+  - easiest: copy `.env.example` to `.env` and set values
+
+3. Start backend API:
 ```bash
 npm run server
 ```
 
-3. In a second terminal, start frontend:
+4. In a second terminal, start frontend:
 ```bash
 npm run dev
 ```
@@ -65,8 +74,13 @@ Backend URL:
 ## Build and Lint
 ```bash
 npm run lint
+npm run typecheck
 npm run build
 ```
+
+## API Documentation
+- OpenAPI spec: `GET /api/openapi.json`
+- Docs UI (ReDoc): `GET /api/docs`
 
 ## Environment Configuration
 Optional frontend API override:
@@ -74,7 +88,33 @@ Optional frontend API override:
 
 If omitted, frontend defaults to `http://localhost:4000/api`.
 
+Additional backend controls (see `.env.example`):
+- `SESSION_TTL_HOURS`
+- `LOGIN_RATE_LIMIT_WINDOW_MS`
+- `LOGIN_RATE_LIMIT_MAX_REQUESTS`
+- `LOGIN_ATTEMPT_WINDOW_MS`
+- `LOGIN_MAX_ATTEMPTS`
+- `LOGIN_LOCKOUT_MS`
+
+## Operations
+Use one backend process manager in production (PM2 or systemd), not multiple concurrent `npm run server`.
+
+Database backup/restore scripts:
+```bash
+npm run db:backup
+npm run db:restore -- -BackupFile backups/salaam-YYYYMMDD-HHMMSS.dump
+```
+
+## CI
+GitHub Actions workflow: `.github/workflows/ci.yml`
+
+Pipeline gates:
+- lint
+- typecheck
+- API integration tests
+- production build
+
 ## Notes
-- Data persists in `backend/db.json`.
-- Session tokens are persisted in `backend/db.json` and validated by `Authorization: Bearer <token>`.
-- The current implementation is modular and ready for migration from JSON persistence to a database layer (PostgreSQL/MySQL/MongoDB) without changing frontend contracts.
+- Data now persists in normalized relational tables (`users`, `roles`, `cars`, `customers`, `bookings`, `payments`, `expenses`, `branches`, `audit_logs`, `sessions`, `settings`).
+- On first start, migrations are applied automatically and legacy data is imported from `backend/db.json`/`app_state` when present.
+- Security middleware includes `helmet`, `cors`, `morgan`, bcrypt-based password storage, and role-based access control.

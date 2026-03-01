@@ -36,19 +36,16 @@
 }
 
 .login-logo {
-    background-color: #ecfdf5;
-    /* Emerald 50 */
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1rem;
 }
 
-.text-primary {
-    color: var(--primary);
+.login-logo-image {
+    width: min(260px, 100%);
+    height: auto;
+    object-fit: contain;
 }
 
 .login-header h1 {
@@ -79,6 +76,12 @@
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
+    transition: opacity 0.15s ease;
+}
+
+.input-icon.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .input-with-icon input {

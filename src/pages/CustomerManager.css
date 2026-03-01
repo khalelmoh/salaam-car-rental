@@ -31,3 +31,246 @@
 .info-row svg {
     color: var(--text-muted);
 }
+
+.customer-table-summary {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+
+.customer-table-summary span {
+    font-size: 0.85rem;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #f8fafc;
+    padding: 0.3rem 0.7rem;
+}
+
+.customer-table-container {
+    border: 1px solid #dbe4ef;
+}
+
+.customer-pagination-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.7rem auto;
+}
+
+.customer-pagination-meta label {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+
+.customer-pagination-meta select {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.35rem 0.55rem;
+    background: #fff;
+    font-size: 0.85rem;
+}
+
+.customer-table-container .data-table th {
+    background: #f8fafc;
+    color: #334155;
+    border: 1px solid #dbe4ef;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.customer-table-container .data-table td {
+    border: 1px solid #e2e8f0;
+}
+
+.customer-table-container .data-table tbody tr:nth-child(even) td {
+    background: #fcfdff;
+}
+
+.customer-table-container .data-table tbody tr:hover td {
+    background: #f1f5f9;
+}
+
+.customer-index {
+    font-weight: 600;
+    color: #475569;
+}
+
+.customer-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.customer-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #0f766e;
+    background: #ccfbf1;
+    border: 1px solid #99f6e4;
+}
+
+.contact-info a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.contact-info a:hover {
+    text-decoration: underline;
+}
+
+.doc-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #0f172a;
+    padding: 0.25rem 0.6rem;
+}
+
+.doc-pill.muted {
+    color: #475569;
+}
+
+.address-cell {
+    max-width: 240px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.customer-empty-state {
+    text-align: center;
+    color: #64748b;
+    font-size: 0.92rem;
+    padding: 1.25rem !important;
+}
+
+.customer-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+}
+
+.customer-page-indicator {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    min-width: 78px;
+    text-align: center;
+}
+
+.customer-page-jump-label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.customer-page-jump-select {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.35rem 0.55rem;
+    background: #fff;
+    font-size: 0.85rem;
+    min-width: 64px;
+}
+
+.customer-report-card {
+    margin-bottom: 1rem;
+    border: 1px solid #dbe4ef;
+}
+
+.customer-report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.customer-report-header h3 {
+    font-size: 1rem;
+    color: #0f172a;
+}
+
+.customer-report-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.customer-report-select {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.5rem 0.7rem;
+    min-width: 260px;
+    background: #fff;
+}
+
+.customer-report-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.customer-report-meta span {
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #f8fafc;
+    padding: 0.25rem 0.65rem;
+    color: #334155;
+    font-size: 0.82rem;
+}
+
+.customer-report-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 0.85rem;
+}
+
+.report-stat {
+    border: 1px solid #dbe4ef;
+    border-radius: 10px;
+    background: #f8fafc;
+    padding: 0.55rem 0.65rem;
+    display: grid;
+    gap: 0.15rem;
+}
+
+.report-stat small {
+    color: #64748b;
+    font-size: 0.75rem;
+}
+
+.report-stat strong {
+    color: #0f172a;
+    font-size: 1rem;
+}
+
+.customer-report-table {
+    border: 1px solid #dbe4ef;
+}
+
+.text-capitalize {
+    text-transform: capitalize;
+}
+
+@media (max-width: 640px) {
+    .customer-report-select {
+        min-width: 100%;
+    }
+}

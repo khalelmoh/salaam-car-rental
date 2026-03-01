@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import Button from './Button';
 import type { ManagedCar } from '../types/models';
@@ -11,21 +11,37 @@ interface CarModalProps {
     car?: ManagedCar | null;
 }
 
+const PRESET_OWNERS = ['Abdirahman Esse', 'Abdiqani Yusuf', 'Yahye Ali'] as const;
+
 const CarModal = ({ isOpen, onClose, onSave, car }: CarModalProps) => {
     const [formData, setFormData] = useState<Partial<ManagedCar>>(() => car || {
         name: '',
-        category: 'Sedan',
+        category: '',
+        ownerPhone: '',
         licensePlate: '',
         pricePerDay: 0,
         status: 'Available',
-        transmission: 'Automatic',
-        seats: 5,
-        fuelType: 'Petrol',
-        mpg: '25/30',
         image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800'
     });
+    const initialOwner = car?.category || '';
+    const [ownerSelection, setOwnerSelection] = useState<string>(
+        initialOwner && !PRESET_OWNERS.includes(initialOwner as typeof PRESET_OWNERS[number])
+            ? 'Other'
+            : initialOwner
+    );
+    const [otherOwnerName, setOtherOwnerName] = useState<string>(
+        initialOwner && !PRESET_OWNERS.includes(initialOwner as typeof PRESET_OWNERS[number]) ? initialOwner : ''
+    );
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        const onEsc = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && isOpen) {
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', onEsc);
+        return () => window.removeEventListener('keydown', onEsc);
+    }, [isOpen, onClose]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -40,13 +56,19 @@ const CarModal = ({ isOpen, onClose, onSave, car }: CarModalProps) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: name === 'pricePerDay' || name === 'seats' ? Number(value) : value
+            [name]: name === 'pricePerDay' ? Number(value) : value
         }));
     };
 
     return (
-        <div className="modal-overlay">
-            <div className="modal-content">
+        <div
+            className={`modal-overlay ${isOpen ? 'is-open' : 'is-closing'}`}
+            onMouseDown={(e) => {
+                if (e.target === e.currentTarget) onClose();
+            }}
+            aria-hidden={!isOpen}
+        >
+            <div className={`modal-content ${isOpen ? 'is-open' : 'is-closing'}`}>
                 <div className="modal-header">
                     <h2>{car ? 'Edit Vehicle' : 'Add New Vehicle'}</h2>
                     <button className="close-btn" onClick={onClose}>
@@ -63,19 +85,60 @@ const CarModal = ({ isOpen, onClose, onSave, car }: CarModalProps) => {
                             value={formData.name}
                             onChange={handleChange}
                             required
-                            placeholder="e.g. Tesla Model 3"
                         />
                     </div>
 
                     <div className="form-group">
-                        <label>Category</label>
-                        <select name="category" value={formData.category} onChange={handleChange}>
-                            <option value="Sedan">Sedan</option>
-                            <option value="SUV">SUV</option>
-                            <option value="Luxury">Luxury</option>
-                            <option value="Sports">Sports</option>
-                            <option value="Van">Van</option>
+                        <label>Owner</label>
+                        <select
+                            name="ownerSelection"
+                            value={ownerSelection}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setOwnerSelection(value);
+                                if (value === 'Other') {
+                                    setFormData((prev) => ({ ...prev, category: otherOwnerName }));
+                                    return;
+                                }
+                                setFormData((prev) => ({ ...prev, category: value }));
+                            }}
+                            required
+                        >
+                            <option value="" disabled>Select owner</option>
+                            <option value="Abdirahman Esse">Abdirahman Esse</option>
+                            <option value="Abdiqani Yusuf">Abdiqani Yusuf</option>
+                            <option value="Yahye Ali">Yahye Ali</option>
+                            <option value="Other">Other</option>
                         </select>
+                    </div>
+                    {ownerSelection === 'Other' && (
+                        <div className="form-group">
+                            <label>Owner Name</label>
+                            <input
+                                type="text"
+                                name="otherOwnerName"
+                                value={otherOwnerName}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setOtherOwnerName(value);
+                                    setFormData((prev) => ({ ...prev, category: value }));
+                                }}
+                                placeholder="Enter owner name"
+                                required
+                            />
+                        </div>
+                    )}
+
+                    <div className="form-group">
+                        <label>Phone Number</label>
+                        <input
+                            type="text"
+                            name="ownerPhone"
+                            value={formData.ownerPhone || ''}
+                            onChange={handleChange}
+                            placeholder="enter phone number"
+                            required
+                        />
                     </div>
 
                     <div className="form-group">
@@ -86,7 +149,6 @@ const CarModal = ({ isOpen, onClose, onSave, car }: CarModalProps) => {
                             value={formData.licensePlate}
                             onChange={handleChange}
                             required
-                            placeholder="DXB-1234"
                         />
                     </div>
 
@@ -111,48 +173,6 @@ const CarModal = ({ isOpen, onClose, onSave, car }: CarModalProps) => {
                         </select>
                     </div>
 
-                    <div className="form-group">
-                        <label>Transmission</label>
-                        <select name="transmission" value={formData.transmission} onChange={handleChange}>
-                            <option value="Automatic">Automatic</option>
-                            <option value="Manual">Manual</option>
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label>Seats</label>
-                        <input
-                            type="number"
-                            name="seats"
-                            value={formData.seats}
-                            onChange={handleChange}
-                            required
-                            min="1"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label>Fuel Type</label>
-                        <select name="fuelType" value={formData.fuelType} onChange={handleChange}>
-                            <option value="Petrol">Petrol</option>
-                            <option value="Diesel">Diesel</option>
-                            <option value="Electric">Electric</option>
-                            <option value="Hybrid">Hybrid</option>
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label>MPG / Range</label>
-                        <input
-                            type="text"
-                            name="mpg"
-                            value={formData.mpg}
-                            onChange={handleChange}
-                            required
-                            placeholder="e.g. 25/30 or 300mi"
-                        />
-                    </div>
-
                     <div className="form-group full-width">
                         <label>Image URL</label>
                         <input
@@ -165,8 +185,8 @@ const CarModal = ({ isOpen, onClose, onSave, car }: CarModalProps) => {
                     </div>
 
                     <div className="modal-footer">
-                        <Button type="button" variant="outline" onClick={onClose}>
-                            Cancel
+                        <Button type="button" variant="danger" onClick={onClose}>
+                            <X size={18} /> Cancel
                         </Button>
                         <Button type="submit">
                             {car ? 'Save Changes' : 'Add Vehicle'}

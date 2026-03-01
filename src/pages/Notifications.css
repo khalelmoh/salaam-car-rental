@@ -1,0 +1,74 @@
+.notifications-page-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.notifications-page-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: #334155;
+  font-size: 0.9rem;
+}
+
+.notifications-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.notifications-page-clear {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.notifications-page-card {
+  background: #ffffff;
+  border: 1px solid #dbe4ef;
+  border-radius: 12px;
+  padding: 1rem;
+  color: #334155;
+}
+
+.notifications-page-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.notifications-page-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.notifications-page-item {
+  background: #ffffff;
+  border: 1px solid #dbe4ef;
+  border-radius: 10px;
+  padding: 0.8rem 0.9rem;
+}
+
+.notifications-page-item-message {
+  color: #0f172a;
+  font-size: 0.92rem;
+  margin-bottom: 0.25rem;
+}
+
+.notifications-page-item-time {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 768px) {
+  .notifications-page-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .notifications-page-actions {
+    justify-content: flex-end;
+  }
+}

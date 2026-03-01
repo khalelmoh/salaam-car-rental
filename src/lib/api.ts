@@ -1,14 +1,26 @@
 import type {
   AppSettings,
   Booking,
+  CarReportPeriod,
+  CarReportResponse,
   Customer,
   DashboardPayload,
+  DiscountType,
+  CustomerReportResponse,
+  FleetReportResponse,
+  ReportPreset,
+  ReportJobResponse,
   ManagedCar,
+  FinanceReportResponse,
+  NotificationItem,
   Transaction,
   User,
 } from '../types/models';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
+const RAW_API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
+const API_BASE = RAW_API_BASE.replace(/\/+$/, '').endsWith('/api')
+  ? RAW_API_BASE.replace(/\/+$/, '')
+  : `${RAW_API_BASE.replace(/\/+$/, '')}/api`;
 const TOKEN_KEY = 'salaam_token';
 
 export function getAuthToken() {
@@ -43,7 +55,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data.error || `Request failed: ${response.status}`);
+    throw new Error(data.message || data.error || `Request failed: ${response.status}`);
   }
 
   return data as T;
@@ -64,6 +76,35 @@ export const api = {
   logout() {
     return request<{ success: boolean }>('/auth/logout', { method: 'POST' });
   },
+  updateProfile(payload: {
+    username?: string;
+    email?: string;
+    name?: string;
+    title?: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }) {
+    return request<{ user: User }>('/auth/profile', { method: 'PUT', body: JSON.stringify(payload) });
+  },
+  listUsers() {
+    return request<User[]>('/users');
+  },
+  createUser(payload: {
+    username: string;
+    email: string;
+    password: string;
+    role: string;
+    name: string;
+    title?: string;
+  }) {
+    return request<User>('/users', { method: 'POST', body: JSON.stringify(payload) });
+  },
+  updateUser(id: string, payload: Partial<User> & { password?: string }) {
+    return request<User>(`/users/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+  },
+  deleteUser(id: string) {
+    return request<{ success: boolean }>(`/users/${id}`, { method: 'DELETE' });
+  },
 
   getDashboard() {
     return request<DashboardPayload>('/dashboard');
@@ -80,6 +121,31 @@ export const api = {
   },
   deleteCar(id: string) {
     return request<{ success: boolean }>(`/cars/${id}`, { method: 'DELETE' });
+  },
+  getCarReport(
+    carId: string,
+    params?: {
+      period?: CarReportPeriod;
+      from?: string;
+      to?: string;
+      month?: number;
+      year?: number;
+      page?: number;
+      pageSize?: number;
+      all?: boolean;
+    }
+  ) {
+    const query = new URLSearchParams();
+    if (params?.period) query.set('period', params.period);
+    if (params?.from) query.set('from', params.from);
+    if (params?.to) query.set('to', params.to);
+    if (params?.month) query.set('month', String(params.month));
+    if (params?.year) query.set('year', String(params.year));
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.pageSize) query.set('pageSize', String(params.pageSize));
+    if (params?.all) query.set('all', 'true');
+    const qs = query.toString();
+    return request<CarReportResponse>(`/cars/${carId}/report${qs ? `?${qs}` : ''}`);
   },
 
   listCustomers() {
@@ -98,7 +164,16 @@ export const api = {
   listBookings() {
     return request<Booking[]>('/bookings');
   },
-  createBooking(payload: Pick<Booking, 'carId' | 'customerId' | 'startDate' | 'endDate'>) {
+  createBooking(payload: {
+    carId: string;
+    customerId: string;
+    startDate: string;
+    startTime: string;
+    endDate: string;
+    endTime: string;
+    discountType?: DiscountType;
+    discountValue?: number;
+  }) {
     return request<Booking>('/bookings', { method: 'POST', body: JSON.stringify(payload) });
   },
   updateBooking(id: string, payload: Partial<Booking>) {
@@ -120,11 +195,102 @@ export const api = {
   deleteTransaction(id: string) {
     return request<{ success: boolean }>(`/transactions/${id}`, { method: 'DELETE' });
   },
+  getFinanceReport(params?: {
+    from?: string;
+    to?: string;
+    includeDetails?: boolean;
+    page?: number;
+    pageSize?: number;
+  }) {
+    const query = new URLSearchParams();
+    if (params?.from) query.set('from', params.from);
+    if (params?.to) query.set('to', params.to);
+    if (params?.includeDetails === false) query.set('includeDetails', 'false');
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.pageSize) query.set('pageSize', String(params.pageSize));
+    const qs = query.toString();
+    return request<FinanceReportResponse>(`/reports/finance${qs ? `?${qs}` : ''}`);
+  },
+  getCustomerReport(params?: {
+    customerId?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    pageSize?: number;
+  }) {
+    const query = new URLSearchParams();
+    if (params?.customerId) query.set('customerId', params.customerId);
+    if (params?.from) query.set('from', params.from);
+    if (params?.to) query.set('to', params.to);
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.pageSize) query.set('pageSize', String(params.pageSize));
+    const qs = query.toString();
+    return request<CustomerReportResponse>(`/reports/customers${qs ? `?${qs}` : ''}`);
+  },
+  getFleetReport(params?: {
+    carId?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    pageSize?: number;
+  }) {
+    const query = new URLSearchParams();
+    if (params?.carId) query.set('carId', params.carId);
+    if (params?.from) query.set('from', params.from);
+    if (params?.to) query.set('to', params.to);
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.pageSize) query.set('pageSize', String(params.pageSize));
+    const qs = query.toString();
+    return request<FleetReportResponse>(`/reports/fleet${qs ? `?${qs}` : ''}`);
+  },
+  listReportPresets(scope?: 'finance' | 'customers' | 'fleet') {
+    const qs = scope ? `?scope=${scope}` : '';
+    return request<ReportPreset[]>(`/reports/presets${qs}`);
+  },
+  createReportPreset(payload: { name: string; scope: 'finance' | 'customers' | 'fleet'; filters?: Record<string, unknown> }) {
+    return request<ReportPreset>('/reports/presets', { method: 'POST', body: JSON.stringify(payload) });
+  },
+  deleteReportPreset(id: string) {
+    return request<{ success: boolean }>(`/reports/presets/${id}`, { method: 'DELETE' });
+  },
+  createReportJob(payload: { reportType: 'finance' | 'customers' | 'fleet'; format?: 'json' | 'pdf' | 'xlsx'; filters?: Record<string, unknown> }) {
+    return request<{ id: string; status: string; reportType: string; format: string; createdAt: string }>('/reports/jobs', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+  getReportJob(id: string) {
+    return request<ReportJobResponse>(`/reports/jobs/${id}`);
+  },
 
   getSettings() {
     return request<AppSettings>('/settings');
   },
   updateSettings(payload: AppSettings) {
     return request<AppSettings>('/settings', { method: 'PUT', body: JSON.stringify(payload) });
+  },
+  async listNotifications(limit = 50) {
+    try {
+      return await request<NotificationItem[]>(`/notifications?limit=${limit}`);
+    } catch (error) {
+      if (!(error instanceof Error) || !/Route not found/i.test(error.message)) {
+        throw error;
+      }
+      const dashboard = await request<DashboardPayload>('/dashboard');
+      return (dashboard.activities || [])
+        .filter((act) => act.type === 'booking' || /^(Reminder:|Overdue:|Alert:)/.test(String(act.message || '')))
+        .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0))
+        .slice(0, Math.max(1, Math.min(200, Number(limit || 50))));
+    }
+  },
+  async clearNotifications() {
+    try {
+      return await request<{ success: boolean; deleted: number }>('/notifications', { method: 'DELETE' });
+    } catch (error) {
+      if (error instanceof Error && /Route not found/i.test(error.message)) {
+        return { success: true, deleted: 0 };
+      }
+      throw error;
+    }
   },
 };

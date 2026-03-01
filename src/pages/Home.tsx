@@ -4,6 +4,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import CarCard from '../components/CarCard';
 import { cars } from '../data/cars';
+import salaamLogo from '../assets/salaam-logo.png';
 import './Home.css';
 
 const Home = () => {
@@ -16,6 +17,7 @@ const Home = () => {
                 <div className="hero-overlay"></div>
                 <div className="container hero-content">
                     <div className="hero-text">
+                        <img src={salaamLogo} alt="Salaam Car Rental logo" className="hero-logo" />
                         <h1 className="hero-title">Experience the Thrill of the Road</h1>
                         <p className="hero-subtitle">Premium car rental services for your business trips and vacations. Choose from our wide range of luxury and sports cars.</p>
                         <div className="hero-actions">

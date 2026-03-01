@@ -72,7 +72,7 @@ const Fleet = () => {
             <div className="container fleet-content">
                 <div className="filters-bar">
                     <div className="filter-group">
-                        <span className="filter-label"><Filter size={16} /> Category:</span>
+                        <span className="filter-label"><Filter size={16} /> Owner:</span>
                         <div className="category-pills">
                             {categories.map((cat) => (
                                 <button
@@ -110,7 +110,7 @@ const Fleet = () => {
                             ))
                         ) : (
                             <div className="no-results">
-                                <p>No vehicles found in this category.</p>
+                                <p>No vehicles found for this owner.</p>
                                 <Button onClick={() => setActiveCategory('All')}>View All Cars</Button>
                             </div>
                         )}

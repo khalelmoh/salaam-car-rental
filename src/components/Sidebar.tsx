@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Car, CalendarRange, Users, Settings, LogOut, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Car, CalendarRange, Users, Settings, LogOut, DollarSign, BellRing } from 'lucide-react';
 import { logout } from '../lib/auth';
 import './Sidebar.css';
 
@@ -44,6 +44,11 @@ const Sidebar = () => {
                 <NavLink to="/finance" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                     <DollarSign size={20} />
                     <span>Finance</span>
+                </NavLink>
+
+                <NavLink to="/notifications" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                    <BellRing size={20} />
+                    <span>Notifications</span>
                 </NavLink>
 
                 <div className="nav-divider"></div>

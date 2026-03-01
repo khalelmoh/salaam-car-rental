@@ -1,30 +1,54 @@
 import { useEffect, useState } from 'react';
+import { BellRing, KeyRound, Save, UserRound } from 'lucide-react';
 import DashboardLayout from '../layouts/DashboardLayout';
 import Button from '../components/Button';
 import { api } from '../lib/api';
 import type { AppSettings } from '../types/models';
-
-const defaultSettings: AppSettings = {
-  companyName: '',
-  contactEmail: '',
-  currency: 'USD',
-  taxRate: 0,
-  bookingLeadHours: 1,
-};
+import './Settings.css';
 
 const Settings = () => {
-  const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSavingBookingNotifications, setIsSavingBookingNotifications] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
+
+  const [profileForm, setProfileForm] = useState({
+    username: '',
+    email: '',
+    name: '',
+    title: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  const [bookingNotificationForm, setBookingNotificationForm] = useState({
+    bookingNotificationsEnabled: true,
+    bookingReminderMinutes: '10',
+    autoMarkOverdue: true,
+  });
 
   useEffect(() => {
     const load = async () => {
+      setError('');
       try {
         setIsLoading(true);
-        const data = await api.getSettings();
-        setSettings(data);
+        const [me, settings] = await Promise.all([api.me(), api.getSettings()]);
+        setProfileForm((prev) => ({
+          ...prev,
+          username: me.user.username || '',
+          email: me.user.email || '',
+          name: me.user.name || '',
+          title: me.user.title || '',
+        }));
+        setAppSettings(settings);
+        setBookingNotificationForm({
+          bookingNotificationsEnabled: settings.bookingNotificationsEnabled !== false,
+          bookingReminderMinutes: String(settings.bookingReminderMinutes ?? 10),
+          autoMarkOverdue: settings.autoMarkOverdue !== false,
+        });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load settings.');
       } finally {
@@ -34,79 +58,217 @@ const Settings = () => {
     load();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setSettings((prev) => ({
-      ...prev,
-      [name]: name === 'taxRate' || name === 'bookingLeadHours' ? Number(value) : value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if (!settings.companyName.trim() || !settings.contactEmail.trim()) {
-      setError('Company name and contact email are required.');
+
+    if (!profileForm.username.trim() || !profileForm.email.trim()) {
+      setError('Username and email are required.');
       return;
     }
-    if (settings.taxRate < 0 || settings.bookingLeadHours < 0) {
-      setError('Tax rate and booking lead hours must be non-negative.');
+    if (profileForm.newPassword && profileForm.newPassword !== profileForm.confirmPassword) {
+      setError('New password and confirm password do not match.');
       return;
     }
 
     try {
-      setIsSaving(true);
-      const updated = await api.updateSettings(settings);
-      setSettings(updated);
-      setSuccess('Settings saved successfully.');
+      setIsSavingProfile(true);
+      const payload: {
+        username: string;
+        email: string;
+        name: string;
+        title: string;
+        currentPassword?: string;
+        newPassword?: string;
+      } = {
+        username: profileForm.username.trim(),
+        email: profileForm.email.trim(),
+        name: profileForm.name.trim(),
+        title: profileForm.title.trim(),
+      };
+      if (profileForm.newPassword) {
+        payload.currentPassword = profileForm.currentPassword;
+        payload.newPassword = profileForm.newPassword;
+      }
+
+      const updated = await api.updateProfile(payload);
+      setProfileForm((prev) => ({
+        ...prev,
+        username: updated.user.username || prev.username,
+        email: updated.user.email || prev.email,
+        name: updated.user.name || '',
+        title: updated.user.title || '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      }));
+      setSuccess('Profile updated successfully.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save settings.');
+      setError(err instanceof Error ? err.message : 'Failed to update profile.');
     } finally {
-      setIsSaving(false);
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handleBookingNotificationsSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!appSettings) {
+      setError('Settings are not loaded yet.');
+      return;
+    }
+
+    const reminderMinutes = Number(bookingNotificationForm.bookingReminderMinutes);
+    if (Number.isNaN(reminderMinutes) || reminderMinutes < 0 || reminderMinutes > 120) {
+      setError('Reminder minutes must be a number between 0 and 120.');
+      return;
+    }
+
+    try {
+      setIsSavingBookingNotifications(true);
+      const updated = await api.updateSettings({
+        ...appSettings,
+        bookingNotificationsEnabled: bookingNotificationForm.bookingNotificationsEnabled,
+        bookingReminderMinutes: reminderMinutes,
+        autoMarkOverdue: bookingNotificationForm.autoMarkOverdue,
+      });
+      setAppSettings(updated);
+      setBookingNotificationForm({
+        bookingNotificationsEnabled: updated.bookingNotificationsEnabled !== false,
+        bookingReminderMinutes: String(updated.bookingReminderMinutes ?? 10),
+        autoMarkOverdue: updated.autoMarkOverdue !== false,
+      });
+      setSuccess('Booking end-time notification settings updated.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update booking notification settings.');
+    } finally {
+      setIsSavingBookingNotifications(false);
     }
   };
 
   return (
     <DashboardLayout title="Settings">
-      {isLoading && <div className="section-card" style={{ marginBottom: '1rem', padding: '1rem' }}>Loading settings...</div>}
-      {error && <div className="section-card" style={{ marginBottom: '1rem', padding: '1rem', color: '#dc2626' }}>{error}</div>}
-      {success && <div className="section-card" style={{ marginBottom: '1rem', padding: '1rem', color: '#15803d' }}>{success}</div>}
+      {isLoading && <div className="settings-status">Loading settings...</div>}
+      {error && <div className="settings-status settings-error">{error}</div>}
+      {success && <div className="settings-status settings-success">{success}</div>}
 
-      <div className="section-card" style={{ padding: '1rem' }}>
-        <h3 style={{ marginBottom: '1rem' }}>System Configuration</h3>
-        <form onSubmit={handleSubmit} className="booking-form">
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Company Name</label>
-              <input className="form-input" name="companyName" required value={settings.companyName} onChange={handleChange} />
-            </div>
-            <div className="form-group">
-              <label>Contact Email</label>
-              <input className="form-input" name="contactEmail" type="email" required value={settings.contactEmail} onChange={handleChange} />
-            </div>
-            <div className="form-group">
-              <label>Currency</label>
-              <select className="form-input" name="currency" value={settings.currency} onChange={handleChange}>
-                <option value="USD">USD</option>
-                <option value="AED">AED</option>
-                <option value="EUR">EUR</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Tax Rate (%)</label>
-              <input className="form-input" name="taxRate" type="number" min="0" step="0.01" value={settings.taxRate} onChange={handleChange} />
-            </div>
-            <div className="form-group">
-              <label>Minimum Booking Lead (Hours)</label>
-              <input className="form-input" name="bookingLeadHours" type="number" min="0" step="1" value={settings.bookingLeadHours} onChange={handleChange} />
-            </div>
-          </div>
-          <div className="form-footer">
-            <Button type="submit" disabled={isSaving}>{isSaving ? 'Saving...' : 'Save Settings'}</Button>
-          </div>
-        </form>
-      </div>
+      {!isLoading && (
+        <div className="settings-grid">
+          <section className="settings-card">
+            <h3><UserRound size={18} /> Profile Settings</h3>
+            <form onSubmit={handleProfileSave} className="settings-form">
+              <label>
+                Username
+                <input
+                  value={profileForm.username}
+                  onChange={(e) => setProfileForm((prev) => ({ ...prev, username: e.target.value }))}
+                  required
+                />
+              </label>
+              <label>
+                Email
+                <input
+                  type="email"
+                  value={profileForm.email}
+                  onChange={(e) => setProfileForm((prev) => ({ ...prev, email: e.target.value }))}
+                  required
+                />
+              </label>
+              <label>
+                Name
+                <input
+                  value={profileForm.name}
+                  onChange={(e) => setProfileForm((prev) => ({ ...prev, name: e.target.value }))}
+                />
+              </label>
+              <label>
+                Title
+                <input
+                  value={profileForm.title}
+                  onChange={(e) => setProfileForm((prev) => ({ ...prev, title: e.target.value }))}
+                />
+              </label>
+
+              <h4><KeyRound size={16} /> Change Password</h4>
+              <label>
+                Current Password
+                <input
+                  type="password"
+                  value={profileForm.currentPassword}
+                  onChange={(e) => setProfileForm((prev) => ({ ...prev, currentPassword: e.target.value }))}
+                />
+              </label>
+              <label>
+                New Password
+                <input
+                  type="password"
+                  value={profileForm.newPassword}
+                  onChange={(e) => setProfileForm((prev) => ({ ...prev, newPassword: e.target.value }))}
+                />
+              </label>
+              <label>
+                Confirm New Password
+                <input
+                  type="password"
+                  value={profileForm.confirmPassword}
+                  onChange={(e) => setProfileForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
+                />
+              </label>
+
+              <div className="settings-actions">
+                <Button type="submit" disabled={isSavingProfile}>
+                  <Save size={16} /> {isSavingProfile ? 'Saving...' : 'Save Profile'}
+                </Button>
+              </div>
+            </form>
+          </section>
+
+          <section className="settings-card">
+            <h3><BellRing size={18} /> Booking End-Time Notifications</h3>
+            <form onSubmit={handleBookingNotificationsSave} className="settings-form">
+              <label className="settings-toggle-row">
+                <input
+                  type="checkbox"
+                  checked={bookingNotificationForm.bookingNotificationsEnabled}
+                  onChange={(e) => setBookingNotificationForm((prev) => ({ ...prev, bookingNotificationsEnabled: e.target.checked }))}
+                />
+                <span>Enable automated booking end-time notifications</span>
+              </label>
+
+              <label>
+                Reminder Before End (minutes)
+                <input
+                  type="number"
+                  min={0}
+                  max={120}
+                  value={bookingNotificationForm.bookingReminderMinutes}
+                  onChange={(e) => setBookingNotificationForm((prev) => ({ ...prev, bookingReminderMinutes: e.target.value }))}
+                  disabled={!bookingNotificationForm.bookingNotificationsEnabled}
+                />
+              </label>
+
+              <label className="settings-toggle-row">
+                <input
+                  type="checkbox"
+                  checked={bookingNotificationForm.autoMarkOverdue}
+                  onChange={(e) => setBookingNotificationForm((prev) => ({ ...prev, autoMarkOverdue: e.target.checked }))}
+                  disabled={!bookingNotificationForm.bookingNotificationsEnabled}
+                />
+                <span>Automatically mark booking as Overdue when end time is reached</span>
+              </label>
+
+              <div className="settings-actions">
+                <Button type="submit" disabled={isSavingBookingNotifications}>
+                  <Save size={16} /> {isSavingBookingNotifications ? 'Saving...' : 'Save Notification Settings'}
+                </Button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
     </DashboardLayout>
   );
 };

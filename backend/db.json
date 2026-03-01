@@ -3,18 +3,176 @@
     {
       "id": "USR-1001",
       "email": "admin@salaam.com",
-      "password": "admin",
       "role": "admin",
-      "name": "Admin User"
+      "name": "Admin User",
+      "passwordHash": "cb255ce90c70b5f810da73593c3bc334:46b3da085ab84610272e866956d8d04d8aa53f36a3e78c60397e7e649d4d8530c07e3065947a0b4400d54d829c16b764a2a5577ff80ca7c7300bc4e59bee1adf",
+      "username": "admin",
+      "title": ""
+    },
+    {
+      "id": "USR-8445",
+      "username": "admin@salaam.com",
+      "email": "khaliil7212@gmail.com",
+      "role": "manager",
+      "name": "khalel",
+      "title": "Manager",
+      "passwordHash": "6854307f5c0b454bf349fde52b5e60e9:7ce0c2c48b87a854e75f0706063154e5aa692d12165fb0a30d353e64cc39d175bec5d5eeba1930e037098c060ce70503504b12235077f347f22cc25e161150de"
+    },
+    {
+      "id": "USR-3290",
+      "username": "staff@salaam.com",
+      "email": "staff@salaam.com",
+      "role": "admin",
+      "name": "Abdirahman",
+      "title": "Mr.",
+      "passwordHash": "25eb84fd49065f96c86579d1554ca1eb:ae86cf70a151c92bc5caceb42b2a17e48a6892d8e38dbc129d8521ff2288451e45d2fc53d3b53b9fe488bfc6d8648bf58b93fd66aca12b33660ca55d0ee1fc26"
     }
   ],
-  "sessions": [],
+  "sessions": [
+    {
+      "token": "9d46a120-20f4-4792-9e65-1e59915761ad",
+      "userId": "USR-1001",
+      "expiresAt": 1771468971125
+    },
+    {
+      "token": "95623a4d-4d66-428d-a6bc-8c78282103f7",
+      "userId": "USR-1001",
+      "expiresAt": 1771469128286
+    },
+    {
+      "token": "df9fc9e2-4e88-4147-85e9-658791ab9015",
+      "userId": "USR-1001",
+      "expiresAt": 1771470509540
+    },
+    {
+      "token": "5f8590a2-4491-4205-8ca6-661f48debee8",
+      "userId": "USR-1001",
+      "expiresAt": 1771470540074
+    },
+    {
+      "token": "2315b89f-25c2-4b08-8e35-8b157e08c4ea",
+      "userId": "USR-1001",
+      "expiresAt": 1771470568234
+    },
+    {
+      "token": "5f3e7abd-2daa-4670-a020-3e7ac06896b7",
+      "userId": "USR-1001",
+      "expiresAt": 1771471227265
+    },
+    {
+      "token": "cda586b7-f48c-419a-86a0-212b64cddbbf",
+      "userId": "USR-1001",
+      "expiresAt": 1771471253199
+    },
+    {
+      "token": "f13e6322-0822-4c59-a808-f427682ff1cf",
+      "userId": "USR-1001",
+      "expiresAt": 1771542830125
+    },
+    {
+      "token": "24df157b-4ae7-4023-9122-12b04f58ef5e",
+      "userId": "USR-1001",
+      "expiresAt": 1771542890489
+    },
+    {
+      "token": "3248a608-b6b1-40f7-b646-80b584a88b41",
+      "userId": "USR-1001",
+      "expiresAt": 1771543466593
+    },
+    {
+      "token": "1afb5d90-2c5c-43fd-a0d1-4eaec0513297",
+      "userId": "USR-1001",
+      "expiresAt": 1771544711888
+    },
+    {
+      "token": "63a0fce7-3155-446f-b3d3-09cbb8d692f8",
+      "userId": "USR-1001",
+      "expiresAt": 1771627519145
+    },
+    {
+      "token": "bb3b8760-a2c5-4752-9693-f92fc3c2a536",
+      "userId": "USR-1001",
+      "expiresAt": 1771628546191
+    },
+    {
+      "token": "438ffca5-96ce-420a-8b20-7d3adcb90005",
+      "userId": "USR-1001",
+      "expiresAt": 1771630443006
+    },
+    {
+      "token": "0e37b695-e3d4-4143-99b6-8b0b2915b834",
+      "userId": "USR-1001",
+      "expiresAt": 1771634601000
+    },
+    {
+      "token": "4c4dfe24-7fa1-4c22-bdf6-d4046d0124de",
+      "userId": "USR-3290",
+      "expiresAt": 1771804578801
+    },
+    {
+      "token": "2111c532-1861-439c-a253-b921134527ff",
+      "userId": "USR-1001",
+      "expiresAt": 1771805756377
+    },
+    {
+      "token": "5b719220-4ccf-4c00-b092-3a7c34563275",
+      "userId": "USR-1001",
+      "expiresAt": 1771806596926
+    },
+    {
+      "token": "b7c840e5-cfca-4a45-b634-2c675436782a",
+      "userId": "USR-1001",
+      "expiresAt": 1771807020836
+    },
+    {
+      "token": "1635a4b8-3cea-4681-97b8-ad2aa3048061",
+      "userId": "USR-1001",
+      "expiresAt": 1771809980123
+    },
+    {
+      "token": "1a1e85da-b3f8-4fca-a7d5-f6b809a5048f",
+      "userId": "USR-1001",
+      "expiresAt": 1771810980925
+    },
+    {
+      "token": "917b3a4b-1513-44b5-9df8-b8b7534f3009",
+      "userId": "USR-1001",
+      "expiresAt": 1771981434997
+    }
+  ],
   "cars": [
     {
+      "id": "CAR-9562",
+      "name": "Toyota Crown Royal Saloon",
+      "category": "Sedan",
+      "image": "https://images.unsplash.com/photo-1638618164682-12b986ec2a75?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dG95b3RhfGVufDB8fDB8fHwy",
+      "pricePerDay": 50,
+      "transmission": "Automatic",
+      "seats": 5,
+      "fuelType": "Petrol",
+      "mpg": "25/30",
+      "status": "Available",
+      "licensePlate": "y8965",
+      "createdAt": "2026-02-22T12:41:16.180Z"
+    },
+    {
+      "id": "CAR-6663",
+      "name": "one 10",
+      "category": "Sedan",
+      "image": "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800",
+      "pricePerDay": 25,
+      "transmission": "Automatic",
+      "seats": 5,
+      "fuelType": "Petrol",
+      "mpg": "25/30",
+      "status": "Rented",
+      "licensePlate": "m8311"
+    },
+    {
       "id": "1",
-      "name": "Toyota Camry",
+      "name": "Toyota Harrier",
       "category": "Economy",
-      "image": "https://images.unsplash.com/photo-1621007947382-bb3c3968e3bb?auto=format&fit=crop&q=80&w=600",
+      "image": "https://images.unsplash.com/photo-1648197323414-4255ea82d86b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dG95b3RhJTIwb25lJTIwMTAlMjBzZWRhbiUyMGNhcnxlbnwwfHwwfHx8Mg%3D%3D",
       "pricePerDay": 45,
       "transmission": "Automatic",
       "seats": 5,
@@ -25,79 +183,638 @@
     },
     {
       "id": "2",
-      "name": "BMW X5",
-      "category": "SUV",
-      "image": "https://images.unsplash.com/photo-1556189250-72ba9540536d?auto=format&fit=crop&q=80&w=600",
-      "pricePerDay": 85,
+      "name": "one 10",
+      "category": "Sedan",
+      "image": "https://images.unsplash.com/photo-1659029932664-1c57dcf101d6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHRveW90YSUyMG9uZSUyMDEwJTIwc2VkYW4lMjBjYXJ8ZW58MHx8MHx8fDI%3D",
+      "pricePerDay": 25,
       "transmission": "Automatic",
       "seats": 5,
-      "fuelType": "Diesel",
+      "fuelType": "Petrol",
       "mpg": "26 MPG",
-      "status": "Rented",
-      "licensePlate": "DXB-3048"
+      "status": "Maintenance",
+      "licensePlate": "m8311"
     },
     {
       "id": "3",
-      "name": "Mercedes-Benz S-Class",
-      "category": "Luxury",
-      "image": "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=600",
-      "pricePerDay": 150,
+      "name": "one 10",
+      "category": "Sedan",
+      "image": "https://images.unsplash.com/photo-1654704089788-5ac8eb863818?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHRveW90YSUyMG9uZSUyMDEwJTIwc2VkYW4lMjBjYXJ8ZW58MHx8MHx8fDI%3D",
+      "pricePerDay": 25,
       "transmission": "Automatic",
       "seats": 5,
       "fuelType": "Petrol",
       "mpg": "22 MPG",
-      "status": "Maintenance",
+      "status": "Available",
       "licensePlate": "DXB-5112"
     }
   ],
   "customers": [
     {
+      "id": "CUST-5588",
+      "fullName": "Abdirahman Esse Yusuf",
+      "phone": "0634028658",
+      "email": "esse14@gmail.com",
+      "nationalId": "333",
+      "driverLicenseNumber": "333",
+      "address": "burco"
+    },
+    {
+      "id": "CUST-3797",
+      "fullName": "Khaliil Maxamed",
+      "phone": "4707900",
+      "email": "khaliil7212@gmail.com",
+      "nationalId": "112233",
+      "driverLicenseNumber": "0000",
+      "address": "hargeisa"
+    },
+    {
       "id": "CUST-1001",
       "fullName": "Ahmed Ali",
-      "phone": "+971 50 123 4567",
-      "email": "ahmed@example.com",
+      "phone": "06347065566",
+      "email": "khaliil7212@gmail.com",
       "nationalId": "784-1234-1234567-1",
-      "driverLicenseNumber": "DXB-98765",
-      "address": "Downtown Dubai, Boulevard Plaza"
+      "driverLicenseNumber": "0000",
+      "address": "hargeisa"
     },
     {
       "id": "CUST-1002",
-      "fullName": "Sarah Smith",
-      "phone": "+971 55 987 6543",
-      "email": "sarah@example.com",
+      "fullName": "cabdi cali",
+      "phone": "0634707900",
+      "email": "khaliil7212@gmail.com",
       "nationalId": "784-5678-7654321-2",
-      "driverLicenseNumber": "DXB-54321",
-      "address": "Dubai Marina, Marina Gate"
+      "driverLicenseNumber": "0000",
+      "address": "hargeisa"
     }
   ],
   "bookings": [
     {
-      "id": "BK-1001",
+      "id": "BK-5470",
       "carId": "1",
       "customerId": "CUST-1001",
-      "startDate": "2026-02-20",
-      "endDate": "2026-02-22",
+      "startDate": "2026-02-24",
+      "startTime": "09:00",
+      "endDate": "2026-02-25",
+      "endTime": "17:00",
+      "discountType": "fixed",
+      "discountValue": 5,
+      "discountAmount": 5,
+      "subtotalAmount": 90,
+      "totalAmount": 85,
+      "status": "active",
+      "paymentStatus": "pending",
+      "createdAt": "2026-02-24T11:45:52.144Z"
+    },
+    {
+      "id": "BK-9176",
+      "carId": "CAR-9562",
+      "customerId": "CUST-5588",
+      "startDate": "2026-02-22",
+      "startTime": "09:00",
+      "endDate": "2026-02-23",
+      "endTime": "17:00",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 100,
+      "totalAmount": 100,
+      "status": "overdue",
+      "paymentStatus": "pending",
+      "createdAt": "2026-02-22T13:47:42.469Z",
+      "overdueNotifiedAt": "2026-02-24T11:43:24.246Z"
+    },
+    {
+      "id": "BK-4726",
+      "carId": "CAR-9562",
+      "customerId": "CUST-3797",
+      "startDate": "2026-02-22",
+      "startTime": "09:00",
+      "endDate": "2026-02-23",
+      "endTime": "09:00",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 50,
+      "totalAmount": 50,
+      "status": "completed",
+      "paymentStatus": "paid",
+      "createdAt": "2026-02-22T12:48:37.542Z"
+    },
+    {
+      "id": "BK-6904",
+      "carId": "1",
+      "customerId": "CUST-1001",
+      "startDate": "2026-02-22",
+      "startTime": "09:00",
+      "endDate": "2026-02-23",
+      "endTime": "17:00",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 90,
       "totalAmount": 90,
-      "status": "reserved",
-      "paymentStatus": "pending"
+      "status": "completed",
+      "paymentStatus": "paid",
+      "createdAt": "2026-02-22T12:38:52.768Z"
+    },
+    {
+      "id": "BK-5757",
+      "carId": "CAR-6663",
+      "customerId": "CUST-5588",
+      "startDate": "2026-02-22",
+      "startTime": "09:00",
+      "endDate": "2026-02-22",
+      "endTime": "17:00",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 25,
+      "totalAmount": 25,
+      "status": "completed",
+      "paymentStatus": "paid",
+      "createdAt": "2026-02-22T12:24:32.710Z"
+    },
+    {
+      "id": "BK-9134",
+      "carId": "3",
+      "customerId": "CUST-1002",
+      "startDate": "2026-02-20",
+      "startTime": "14:35",
+      "endDate": "2026-02-21",
+      "endTime": "14:35",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 25,
+      "totalAmount": 25,
+      "status": "completed",
+      "paymentStatus": "paid",
+      "createdAt": "2026-02-20T11:37:40.726Z"
+    },
+    {
+      "id": "BK-3843",
+      "carId": "3",
+      "customerId": "CUST-3797",
+      "startDate": "2026-02-20",
+      "startTime": "13:40",
+      "endDate": "2026-02-21",
+      "endTime": "13:40",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 25,
+      "totalAmount": 25,
+      "status": "completed",
+      "paymentStatus": "paid",
+      "createdAt": "2026-02-20T10:42:42.104Z"
+    },
+    {
+      "id": "BK-2161",
+      "carId": "1",
+      "customerId": "CUST-1002",
+      "startDate": "2026-02-19",
+      "endDate": "2026-02-20",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 45,
+      "totalAmount": 45,
+      "status": "completed",
+      "paymentStatus": "paid"
+    },
+    {
+      "id": "BK-8622",
+      "carId": "CAR-6663",
+      "customerId": "CUST-3797",
+      "startDate": "2026-02-19",
+      "endDate": "2026-02-20",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 25,
+      "totalAmount": 25,
+      "status": "completed",
+      "paymentStatus": "paid"
+    },
+    {
+      "id": "BK-6992",
+      "carId": "1",
+      "customerId": "CUST-1001",
+      "startDate": "2026-02-19",
+      "endDate": "2026-02-20",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 45,
+      "totalAmount": 45,
+      "status": "completed",
+      "paymentStatus": "paid"
+    },
+    {
+      "id": "BK-7762",
+      "carId": "1",
+      "customerId": "CUST-1002",
+      "startDate": "2026-02-19",
+      "endDate": "2026-02-20",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 45,
+      "totalAmount": 45,
+      "status": "completed",
+      "paymentStatus": "paid"
+    },
+    {
+      "id": "BK-3016",
+      "carId": "1",
+      "customerId": "CUST-3797",
+      "startDate": "2026-02-19",
+      "endDate": "2026-02-19",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 45,
+      "totalAmount": 45,
+      "status": "completed",
+      "paymentStatus": "paid"
+    },
+    {
+      "id": "BK-1452",
+      "carId": "2",
+      "customerId": "CUST-1001",
+      "startDate": "2026-02-19",
+      "endDate": "2026-02-20",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 25,
+      "totalAmount": 25,
+      "status": "completed",
+      "paymentStatus": "paid"
+    },
+    {
+      "id": "BK-7817",
+      "carId": "1",
+      "customerId": "CUST-1002",
+      "startDate": "2026-02-19",
+      "endDate": "2026-02-20",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 45,
+      "totalAmount": 45,
+      "status": "completed",
+      "paymentStatus": "paid"
+    },
+    {
+      "id": "BK-7126",
+      "carId": "CAR-6663",
+      "customerId": "CUST-3797",
+      "startDate": "2026-02-19",
+      "endDate": "2026-02-21",
+      "discountType": "fixed",
+      "discountValue": 5,
+      "discountAmount": 5,
+      "subtotalAmount": 50,
+      "totalAmount": 45,
+      "status": "completed",
+      "paymentStatus": "paid"
+    },
+    {
+      "id": "BK-7706",
+      "carId": "1",
+      "customerId": "CUST-1002",
+      "startDate": "2026-02-21",
+      "endDate": "2026-02-23",
+      "totalAmount": 90,
+      "status": "completed",
+      "paymentStatus": "paid",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 90
+    },
+    {
+      "id": "BK-2207",
+      "carId": "3",
+      "customerId": "CUST-1001",
+      "startDate": "2026-02-25",
+      "endDate": "2026-02-27",
+      "totalAmount": 300,
+      "status": "completed",
+      "paymentStatus": "paid",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 300
+    },
+    {
+      "id": "BK-1622",
+      "carId": "2",
+      "customerId": "CUST-1001",
+      "startDate": "2026-02-25",
+      "endDate": "2026-02-27",
+      "totalAmount": 200,
+      "status": "completed",
+      "paymentStatus": "paid",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 200
+    },
+    {
+      "id": "BK-4209",
+      "carId": "CAR-6663",
+      "customerId": "CUST-3797",
+      "startDate": "2026-02-18",
+      "endDate": "2026-02-19",
+      "totalAmount": 25,
+      "status": "completed",
+      "paymentStatus": "paid",
+      "discountType": "fixed",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "subtotalAmount": 25
+    },
+    {
+      "id": "BK-5852",
+      "carId": "CAR-6663",
+      "customerId": "CUST-3797",
+      "startDate": "2026-02-18",
+      "endDate": "2026-02-20",
+      "totalAmount": 50,
+      "status": "completed",
+      "paymentStatus": "paid"
+    },
+    {
+      "id": "BK-6127",
+      "carId": "CAR-6663",
+      "customerId": "CUST-1002",
+      "startDate": "2026-02-18",
+      "endDate": "2026-02-19",
+      "totalAmount": 25,
+      "status": "completed",
+      "paymentStatus": "paid"
+    },
+    {
+      "id": "BK-7969",
+      "carId": "CAR-6663",
+      "customerId": "CUST-1001",
+      "startDate": "2026-02-18",
+      "endDate": "2026-02-19",
+      "totalAmount": 25,
+      "status": "completed",
+      "paymentStatus": "paid"
     }
   ],
   "transactions": [
     {
-      "id": "TRX-9812",
-      "date": "2026-02-15",
-      "description": "Rental: Toyota Camry (2 Days)",
+      "id": "TRX-5236",
+      "date": "2026-02-24",
+      "description": "Booking BK-5470: Toyota Harrier (Ahmed Ali)",
+      "type": "Income",
+      "amount": 85,
+      "category": "Rental",
+      "bookingId": "BK-5470",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-4229",
+      "date": "2026-02-22",
+      "description": "Booking BK-9176: Toyota Crown Royal Saloon (Abdirahman Esse Yusuf)",
+      "type": "Income",
+      "amount": 100,
+      "category": "Rental",
+      "bookingId": "BK-9176",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-7359",
+      "date": "2026-02-22",
+      "description": "Booking BK-4726: Toyota Crown Royal Saloon (Khaliil Maxamed)",
+      "type": "Income",
+      "amount": 50,
+      "category": "Rental",
+      "bookingId": "BK-4726",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-3849",
+      "date": "2026-02-22",
+      "description": "Booking BK-6904: Toyota Harrier (Ahmed Ali)",
       "type": "Income",
       "amount": 90,
-      "category": "Rental"
+      "category": "Rental",
+      "bookingId": "BK-6904",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-9505",
+      "date": "2026-02-22",
+      "description": "Booking BK-5757: one 10 (Abdirahman Esse Yusuf)",
+      "type": "Income",
+      "amount": 25,
+      "category": "Rental",
+      "bookingId": "BK-5757",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-6184",
+      "date": "2026-02-20",
+      "description": "Booking BK-9134: one 10 (cabdi cali)",
+      "type": "Income",
+      "amount": 25,
+      "category": "Rental",
+      "bookingId": "BK-9134",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-7622",
+      "date": "2026-02-20",
+      "description": "Booking BK-3843: one 10 (Khaliil Maxamed)",
+      "type": "Income",
+      "amount": 25,
+      "category": "Rental",
+      "bookingId": "BK-3843",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-5037",
+      "date": "2026-02-19",
+      "description": "harrier ",
+      "type": "Income",
+      "amount": 200,
+      "category": "rent"
+    },
+    {
+      "id": "TRX-3963",
+      "date": "2026-02-19",
+      "description": "Booking BK-2161: Toyota Harrier (cabdi cali)",
+      "type": "Income",
+      "amount": 45,
+      "category": "Rental",
+      "bookingId": "BK-2161",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-3905",
+      "date": "2026-02-19",
+      "description": "Booking BK-8622: one 10 (Khaliil Maxamed)",
+      "type": "Income",
+      "amount": 25,
+      "category": "Rental",
+      "bookingId": "BK-8622",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-2398",
+      "date": "2026-02-19",
+      "description": "Booking BK-6992: Toyota Harrier (Ahmed Ali)",
+      "type": "Income",
+      "amount": 45,
+      "category": "Rental",
+      "bookingId": "BK-6992",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-7800",
+      "date": "2026-02-19",
+      "description": "Booking BK-7762: Toyota Harrier (cabdi cali)",
+      "type": "Income",
+      "amount": 45,
+      "category": "Rental",
+      "bookingId": "BK-7762",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-7169",
+      "date": "2026-02-19",
+      "description": "Booking BK-3016: Toyota Harrier (Khaliil Maxamed)",
+      "type": "Income",
+      "amount": 45,
+      "category": "Rental",
+      "bookingId": "BK-3016",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-9205",
+      "date": "2026-02-19",
+      "description": "Booking BK-1452: one 10 (Ahmed Ali)",
+      "type": "Income",
+      "amount": 25,
+      "category": "Rental",
+      "bookingId": "BK-1452",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-7512",
+      "date": "2026-02-19",
+      "description": "Booking BK-7817: Toyota Harrier (cabdi cali)",
+      "type": "Income",
+      "amount": 45,
+      "category": "Rental",
+      "bookingId": "BK-7817",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-2372",
+      "date": "2026-02-19",
+      "description": "Booking BK-7126: one 10 (Khaliil Maxamed)",
+      "type": "Income",
+      "amount": 45,
+      "category": "Rental",
+      "bookingId": "BK-7126",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-6965",
+      "date": "2026-02-18",
+      "description": "Booking BK-4209: one 10 (Khaliil Maxamed)",
+      "type": "Income",
+      "amount": 25,
+      "category": "Rental",
+      "bookingId": "BK-4209",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-3009",
+      "date": "2026-02-25",
+      "description": "Booking BK-1622: BMW X5 (Ahmed Ali)",
+      "type": "Income",
+      "amount": 200,
+      "category": "Rental",
+      "bookingId": "BK-1622",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-3485",
+      "date": "2026-02-25",
+      "description": "Booking BK-2207: Mercedes-Benz S-Class (Ahmed Ali)",
+      "type": "Income",
+      "amount": 300,
+      "category": "Rental",
+      "bookingId": "BK-2207",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-1532",
+      "date": "2026-02-21",
+      "description": "Booking BK-7706: Toyota Camry (Sarah Smith)",
+      "type": "Income",
+      "amount": 90,
+      "category": "Rental",
+      "bookingId": "BK-7706",
+      "systemGenerated": true
+    },
+    {
+      "id": "TRX-6126",
+      "date": "2026-02-19",
+      "description": "dfsf",
+      "type": "Expense",
+      "amount": 100,
+      "category": "myt"
+    },
+    {
+      "id": "TRX-8836",
+      "date": "2026-02-19",
+      "description": "geerash",
+      "type": "Income",
+      "amount": 50,
+      "category": "one 10 m8311"
+    },
+    {
+      "id": "TRX-1768",
+      "date": "2026-02-18",
+      "description": "car rental",
+      "type": "Income",
+      "amount": 10,
+      "category": "one ten rent"
     }
   ],
-  "activities": [],
+  "activities": [
+    {
+      "id": "ACT-9120",
+      "message": "Overdue: Booking BK-9176 passed end time and was marked overdue.",
+      "type": "booking",
+      "timestamp": 1771933404246
+    },
+    {
+      "id": "ACT-6801",
+      "message": "Vehicle Toyota Crown Royal Saloon added",
+      "type": "fleet",
+      "timestamp": 1771764076180
+    },
+    {
+      "id": "ACT-5464",
+      "message": "Vehicle one 10 added",
+      "type": "fleet",
+      "timestamp": 1771426024101
+    }
+  ],
   "settings": {
     "companyName": "Salaam Car Rental",
     "contactEmail": "admin@salaam.com",
     "currency": "USD",
-    "taxRate": 5,
-    "bookingLeadHours": 2
+    "taxRate": 0,
+    "bookingLeadHours": 0
   }
 }

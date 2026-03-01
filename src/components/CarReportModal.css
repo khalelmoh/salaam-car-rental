@@ -1,0 +1,236 @@
+.report-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.56);
+  backdrop-filter: blur(5px);
+  z-index: 1100;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  pointer-events: none;
+}
+
+.report-modal-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.report-modal-overlay.is-closing {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.report-modal-content {
+  width: min(1200px, 100%);
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #dbe4ef;
+  box-shadow: 0 28px 50px rgba(15, 23, 42, 0.24);
+  overflow: hidden;
+  transform: translateY(16px) scale(0.985);
+  opacity: 0;
+  transition: transform 0.24s ease, opacity 0.24s ease;
+}
+
+.report-modal-content.is-open {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.report-modal-content.is-closing {
+  transform: translateY(16px) scale(0.985);
+  opacity: 0;
+}
+
+.report-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(90deg, #f8fafc 0%, #ecfeff 100%);
+}
+
+.report-modal-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #0f172a;
+}
+
+.report-modal-header p {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.report-close-btn {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.report-close-btn:hover {
+  color: #1e293b;
+  background: #eff6f5;
+}
+
+.report-filter-row {
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  align-items: flex-end;
+}
+
+.report-filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.report-filter-item label {
+  font-size: 0.75rem;
+  color: #475569;
+}
+
+.report-filter-item input,
+.report-filter-item select {
+  height: 36px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 0.7rem;
+  min-width: 130px;
+}
+
+.report-export-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.report-state {
+  padding: 1rem 1.25rem;
+  color: #334155;
+}
+
+.report-error {
+  color: #dc2626;
+}
+
+.report-summary-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  padding: 1rem 1.25rem;
+}
+
+.report-summary-card {
+  border: 1px solid #d8e2ef;
+  border-radius: 10px;
+  padding: 0.8rem;
+  background: #ffffff;
+}
+
+.report-summary-card span {
+  display: block;
+  font-size: 0.75rem;
+  color: #475569;
+  margin-bottom: 0.25rem;
+}
+
+.report-summary-card strong {
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.report-table-wrap {
+  padding: 0 1.25rem 1rem;
+  overflow-x: auto;
+}
+
+.report-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.report-history-table th {
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #dbe4ef;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+}
+
+.report-history-table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.75rem 0.9rem;
+  color: #0f172a;
+}
+
+.report-history-table tbody tr:nth-child(even) td {
+  background: #fcfdff;
+}
+
+.report-empty {
+  text-align: center;
+  color: #64748b;
+}
+
+.report-pagination {
+  border-top: 1px solid #e2e8f0;
+  padding: 0.85rem 1.25rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.report-pagination span {
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.report-pagination-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.report-exporting {
+  border-top: 1px solid #e2e8f0;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.85rem;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+@media (max-width: 768px) {
+  .report-modal-overlay {
+    padding: 0;
+  }
+
+  .report-modal-content {
+    border-radius: 0;
+    min-height: 100vh;
+  }
+
+  .report-export-actions {
+    margin-left: 0;
+  }
+}

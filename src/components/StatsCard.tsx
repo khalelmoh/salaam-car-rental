@@ -9,13 +9,21 @@ interface StatsCardProps {
         value: number;
         isPositive: boolean;
     };
+    trendLabel?: string;
     color?: string;
 }
 
-const StatsCard = ({ title, value, icon, trend, color = 'var(--primary)' }: StatsCardProps) => {
+const StatsCard = ({
+    title,
+    value,
+    icon,
+    trend,
+    trendLabel = 'from last month',
+    color = 'var(--primary)',
+}: StatsCardProps) => {
     return (
         <div className="stats-card">
-            <div className="stats-icon" style={{ backgroundColor: color }}>
+            <div className="stats-icon" style={{ backgroundColor: color }} aria-hidden="true">
                 {icon}
             </div>
             <div className="stats-content">
@@ -23,7 +31,8 @@ const StatsCard = ({ title, value, icon, trend, color = 'var(--primary)' }: Stat
                 <div className="stats-value">{value}</div>
                 {trend && (
                     <div className={`stats-trend ${trend.isPositive ? 'positive' : 'negative'}`}>
-                        {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}% from last month
+                        <span className="stats-trend-arrow">{trend.isPositive ? '+' : '-'}</span>
+                        <span>{Math.abs(trend.value)}% {trendLabel}</span>
                     </div>
                 )}
             </div>

@@ -1,0 +1,137 @@
+.settings-status {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #dbe4ef;
+  background: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.settings-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.settings-success {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.settings-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.settings-card {
+  background: #ffffff;
+  border: 1px solid #dbe4ef;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.settings-card h3 {
+  margin: 0 0 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #0f172a;
+}
+
+.settings-card h4 {
+  margin: 0.5rem 0 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.settings-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.settings-form label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+.settings-form input,
+.settings-form select {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.9rem;
+}
+
+.settings-toggle-row {
+  display: flex !important;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem !important;
+}
+
+.settings-toggle-row input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.settings-inline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.6rem;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.settings-table-wrap {
+  margin-top: 0.8rem;
+  overflow-x: auto;
+}
+
+.settings-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 780px;
+}
+
+.settings-table th,
+.settings-table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+}
+
+.settings-table th {
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.8rem;
+}
+
+.settings-table td input,
+.settings-table td select {
+  width: 100%;
+}
+
+.settings-row-actions {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.settings-delete-btn {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.settings-delete-btn:hover {
+  background: #fef2f2;
+}

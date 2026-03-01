@@ -1,24 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Plus, ExternalLink } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import DashboardLayout from '../layouts/DashboardLayout';
 import CarTable from '../components/CarTable';
 import Button from '../components/Button';
 import CarModal from '../components/CarModal';
+import CarReportModal from '../components/CarReportModal';
 import { api } from '../lib/api';
+import { onDataChanged } from '../utils/realtime';
 import type { ManagedCar } from '../types/models';
+import { useToast } from '../hooks/useToast';
 import './FleetManager.css';
 
 const FleetManager = () => {
-    const navigate = useNavigate();
     const [fleet, setFleet] = useState<ManagedCar[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const { showToast } = useToast();
 
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCar, setEditingCar] = useState<ManagedCar | null>(null);
+    const [reportCar, setReportCar] = useState<ManagedCar | null>(null);
 
     useEffect(() => {
         const load = async () => {
@@ -34,6 +36,8 @@ const FleetManager = () => {
             }
         };
         load();
+        const unsubscribe = onDataChanged(load);
+        return unsubscribe;
     }, []);
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -45,9 +49,11 @@ const FleetManager = () => {
             try {
                 await api.deleteCar(id);
                 setFleet(fleet.filter(c => c.id !== id));
-                setSuccess('Vehicle deleted.');
+                showToast('Vehicle deleted.', 'success');
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Delete failed.');
+                const message = err instanceof Error ? err.message : 'Delete failed.';
+                setError(message);
+                showToast(message, 'error');
             }
         }
     };
@@ -62,18 +68,22 @@ const FleetManager = () => {
         setIsModalOpen(true);
     };
 
+    const handleViewReport = (car: ManagedCar) => {
+        setReportCar(car);
+    };
+
     const handleSave = async (car: ManagedCar) => {
         setError('');
-        setSuccess('');
         try {
             if (editingCar) {
                 const updated = await api.updateCar(car.id, car);
                 setFleet(fleet.map(c => c.id === updated.id ? updated : c));
-                setSuccess('Vehicle updated.');
+                showToast('Vehicle updated.', 'success');
             } else {
                 const payload = {
                     name: car.name,
                     category: car.category,
+                    ownerPhone: car.ownerPhone || '',
                     image: car.image,
                     pricePerDay: car.pricePerDay,
                     transmission: car.transmission,
@@ -85,10 +95,12 @@ const FleetManager = () => {
                 };
                 const created = await api.createCar(payload);
                 setFleet([created, ...fleet]);
-                setSuccess('Vehicle added.');
+                showToast('Vehicle added.', 'success');
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Save failed.');
+            const message = err instanceof Error ? err.message : 'Save failed.';
+            setError(message);
+            showToast(message, 'error');
             throw err;
         }
     };
@@ -110,8 +122,7 @@ const FleetManager = () => {
         <DashboardLayout title="Fleet Management">
             {isLoading && <div className="section-card" style={{ marginBottom: '1rem', padding: '1rem' }}>Loading fleet...</div>}
             {error && <div className="section-card" style={{ marginBottom: '1rem', padding: '1rem', color: '#dc2626' }}>{error}</div>}
-            {success && <div className="section-card" style={{ marginBottom: '1rem', padding: '1rem', color: '#15803d' }}>{success}</div>}
-            <div className="fleet-controls">
+            <div className="fleet-controls reveal-up">
                 <div className="control-group">
                     <input
                         type="text"
@@ -141,20 +152,20 @@ const FleetManager = () => {
                     </select>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <Button variant="outline" onClick={() => navigate('/fleet/catalog')}>
-                        <ExternalLink size={18} /> Open Catalog
-                    </Button>
                     <Button onClick={handleAddNew}>
                         <Plus size={18} /> Add New Vehicle
                     </Button>
                 </div>
             </div>
 
-            <CarTable
-                cars={filteredFleet}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-            />
+            <div className="reveal-up delay-1">
+                <CarTable
+                    cars={filteredFleet}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onViewReport={handleViewReport}
+                />
+            </div>
 
             <CarModal
                 key={editingCar?.id || 'new'}
@@ -162,6 +173,11 @@ const FleetManager = () => {
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSave}
                 car={editingCar}
+            />
+            <CarReportModal
+                carId={reportCar?.id || null}
+                isOpen={Boolean(reportCar)}
+                onClose={() => setReportCar(null)}
             />
         </DashboardLayout>
     );

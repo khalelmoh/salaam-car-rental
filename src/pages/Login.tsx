@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Lock, Mail } from 'lucide-react';
+import { Lock, Mail } from 'lucide-react';
 import Button from '../components/Button';
 import { login } from '../lib/auth';
+import salaamLogo from '../assets/salaam-logo.png';
 import './Login.css';
 
 const Login = () => {
@@ -37,7 +38,7 @@ const Login = () => {
             <div className="login-card">
                 <div className="login-header">
                     <div className="login-logo">
-                        <Car size={32} className="text-primary" />
+                        <img src={salaamLogo} alt="Salaam Car Rental logo" className="login-logo-image" />
                     </div>
                     <h1>Salaam Car Rental</h1>
                     <p>Management System Login</p>
@@ -49,12 +50,12 @@ const Login = () => {
                     <div className="form-group">
                         <label>Email Address</label>
                         <div className="input-with-icon">
-                            <Mail size={18} className="input-icon" />
+                            <Mail size={18} className={`input-icon ${email ? 'hidden' : ''}`} />
                             <input
                                 type="email"
-                                placeholder="admin@salaam.com"
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
+                                autoComplete="off"
                                 required
                             />
                         </div>
@@ -63,12 +64,12 @@ const Login = () => {
                     <div className="form-group">
                         <label>Password</label>
                         <div className="input-with-icon">
-                            <Lock size={18} className="input-icon" />
+                            <Lock size={18} className={`input-icon ${password ? 'hidden' : ''}`} />
                             <input
                                 type="password"
-                                placeholder="••••••"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
+                                autoComplete="new-password"
                                 required
                             />
                         </div>
@@ -78,9 +79,6 @@ const Login = () => {
                         {isLoading ? 'Signing in...' : 'Sign In'}
                     </Button>
 
-                    <div className="login-footer">
-                        <p className="text-sm text-muted">Use <strong>admin@salaam.com</strong> / <strong>admin</strong></p>
-                    </div>
                 </form>
             </div>
         </div>

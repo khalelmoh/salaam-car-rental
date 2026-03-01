@@ -1,0 +1,5 @@
+.reports-topbar {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 0.8rem;
+}
