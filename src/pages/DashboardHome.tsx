@@ -1,5 +1,5 @@
 import { Car, DollarSign, Calendar, Activity, TrendingUp, PieChart, Clock3 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import DashboardLayout from '../layouts/DashboardLayout';
 import StatsCard from '../components/StatsCard';
 import RevenueChart from '../components/RevenueChart';
@@ -170,7 +170,7 @@ const DashboardHome = () => {
     const currentRange = useMemo(() => getRangeFromPreset(rangePreset), [rangePreset]);
     const previousRange = useMemo(() => getPreviousRange(currentRange), [currentRange]);
 
-    const getMetricsForRange = (range: DateRange) => {
+    const getMetricsForRange = useCallback((range: DateRange) => {
         const bookingsInRange = bookings.filter((booking) => bookingOverlapsRange(booking, range));
         const activeRentals = bookingsInRange.filter((b) => b.status === 'active' || b.status === 'overdue').length;
         const pendingAmount = bookingsInRange
@@ -188,10 +188,10 @@ const DashboardHome = () => {
             utilization,
             totalFleet,
         };
-    };
+    }, [bookings, transactions, dashboard?.totalFleet]);
 
-    const currentMetrics = useMemo(() => getMetricsForRange(currentRange), [currentRange, bookings, transactions, dashboard]);
-    const previousMetrics = useMemo(() => (previousRange ? getMetricsForRange(previousRange) : null), [previousRange, bookings, transactions, dashboard]);
+    const currentMetrics = useMemo(() => getMetricsForRange(currentRange), [currentRange, getMetricsForRange]);
+    const previousMetrics = useMemo(() => (previousRange ? getMetricsForRange(previousRange) : null), [previousRange, getMetricsForRange]);
 
     const activities = useMemo(
         () =>

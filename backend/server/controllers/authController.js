@@ -81,6 +81,7 @@ async function findUserByIdentifier(identifier) {
      FROM users u
      JOIN roles r ON r.id = u.role_id
      WHERE LOWER(u.email) = LOWER($1) OR LOWER(COALESCE(u.username, '')) = LOWER($1)
+     ORDER BY CASE WHEN LOWER(u.email) = LOWER($1) THEN 0 ELSE 1 END, u.created_at ASC
      LIMIT 1`,
     [identifier]
   );
