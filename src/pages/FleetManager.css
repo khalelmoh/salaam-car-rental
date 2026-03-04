@@ -3,12 +3,14 @@
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1rem;
-    background: linear-gradient(170deg, #ffffff 0%, #f8fcfa 100%);
+    margin-bottom: 1.1rem;
+    background:
+        radial-gradient(circle at 8% 18%, rgba(14, 165, 233, 0.14), transparent 42%),
+        linear-gradient(155deg, #ffffff 0%, #f2faff 58%, #f3fbf7 100%);
     padding: 1rem 1.1rem;
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
+    border: 1px solid #d3e2f2;
+    box-shadow: 0 12px 22px rgba(19, 34, 53, 0.08);
 }
 
 .control-group {
@@ -23,6 +25,8 @@
     padding: 0.62rem 0.9rem;
     width: min(100%, 260px);
     font-size: 0.9rem;
+    border-color: #cbdcf0;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
 }
 
 .table-search:focus {
@@ -39,6 +43,8 @@
     background-repeat: no-repeat;
     background-size: 1.5em 1.5em;
     min-width: 140px;
+    border-color: #cbdcf0;
+    background-color: #fff;
 }
 
 .table-select:focus {

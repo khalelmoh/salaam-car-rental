@@ -62,12 +62,14 @@
 
 /* Booking Form Styles */
 .booking-form-card {
-    background-color: var(--surface);
+    background:
+        radial-gradient(circle at 95% -24%, rgba(14, 165, 233, 0.08), transparent 40%),
+        linear-gradient(180deg, #ffffff 0%, #f9fcff 100%);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     margin-bottom: 1rem;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
+    border: 1px solid #d5e2f1;
+    box-shadow: 0 12px 24px rgba(19, 34, 53, 0.08);
     animation: slideDown 0.3s ease-out;
 }
 
@@ -87,7 +89,7 @@
     margin-bottom: 1rem;
     font-size: 1.02rem;
     color: var(--text-main);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid #dce8f5;
     padding-bottom: 0.75rem;
 }
 
@@ -114,7 +116,8 @@
     padding: 0.65rem 0.7rem;
     font-size: 0.9rem;
     transition: border-color 0.2s, box-shadow 0.2s;
-    background-color: #fff;
+    background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+    border-color: #cdddf0;
 }
 
 .form-input:focus {
@@ -127,7 +130,7 @@
     align-items: center;
     gap: 1rem;
     padding-top: 0.8rem;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid #dce8f5;
     flex-wrap: wrap;
 }
 
@@ -174,7 +177,7 @@
 }
 
 .booking-pagination-meta select {
-    border: 1px solid var(--border);
+    border: 1px solid #cbdcf0;
     border-radius: 8px;
     padding: 0.35rem 0.55rem;
     background: #fff;
@@ -204,7 +207,7 @@
 }
 
 .booking-page-jump-select {
-    border: 1px solid var(--border);
+    border: 1px solid #cbdcf0;
     border-radius: 8px;
     padding: 0.35rem 0.55rem;
     background: #fff;

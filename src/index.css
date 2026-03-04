@@ -102,17 +102,20 @@ a:focus-visible {
 }
 
 .section-card {
-  background-color: var(--surface);
+  background:
+    radial-gradient(circle at 92% -28%, rgba(14, 165, 233, 0.08), transparent 44%),
+    linear-gradient(180deg, #ffffff 0%, #f9fcff 100%);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border);
+  border: 1px solid #d8e3f1;
   overflow: hidden;
 }
 
 .card-header {
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--border);
-  background: linear-gradient(180deg, #fbfdfc 0%, #f3f8f6 100%);
+  border-bottom: 1px solid #dbe7f5;
+  background:
+    linear-gradient(110deg, #f4f9ff 0%, #f1fbf7 48%, #fff7eb 100%);
 }
 
 .card-body {
@@ -120,10 +123,11 @@ a:focus-visible {
 }
 
 .table-container {
-  background-color: var(--surface);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border);
+  border: 1px solid #d8e3f1;
   overflow: auto;
 }
 
@@ -141,19 +145,20 @@ a:focus-visible {
   z-index: 1;
   padding: 0.9rem 1rem;
   font-weight: 700;
-  color: var(--text-muted);
-  border-bottom: 1px solid var(--border);
+  color: #4f6580;
+  border-bottom: 1px solid #d9e7f5;
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: #f7fbf9;
+  background: linear-gradient(180deg, #f5f9ff 0%, #edf6f2 100%);
 }
 
 .data-table td {
   padding: 0.95rem 1rem;
-  border-bottom: 1px solid #edf2f1;
+  border-bottom: 1px solid #e5edf7;
   color: var(--text-main);
   vertical-align: middle;
+  background: #ffffff;
 }
 
 .data-table tr:last-child td {
@@ -161,7 +166,7 @@ a:focus-visible {
 }
 
 .data-table tr:hover td {
-  background-color: #f8fcfa;
+  background: linear-gradient(90deg, #f2f9ff 0%, #f3fbf7 100%);
 }
 
 .form-input,
@@ -188,17 +193,17 @@ a:focus-visible {
 }
 
 .badge-success {
-  background-color: #dcf4e9;
-  color: #0a7a55;
+  background-color: #dff8ec;
+  color: #0e7f59;
 }
 
 .badge-warning {
-  background-color: #ffe9d2;
+  background-color: #fff0dc;
   color: #a95f0c;
 }
 
 .badge-danger {
-  background-color: #ffe2e2;
+  background-color: #ffe8e8;
   color: #b72f2f;
 }
 
@@ -215,10 +220,17 @@ a:focus-visible {
   transition: all 0.18s ease;
   cursor: pointer;
   background: transparent;
-  border: 1px solid transparent;
+  border: 1px solid #d9e4f2;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  color: #4a6280;
+}
+
+.action-btn:hover {
+  background: linear-gradient(180deg, #f6faff 0%, #eef6ff 100%);
+  border-color: #bfd5ee;
+  color: #1f3f63;
 }
 
 .reveal-up {

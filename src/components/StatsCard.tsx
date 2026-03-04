@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import './StatsCard.css';
 
 interface StatsCardProps {
@@ -21,9 +21,11 @@ const StatsCard = ({
     trendLabel = 'from last month',
     color = 'var(--primary)',
 }: StatsCardProps) => {
+    const style = { '--card-accent': color } as CSSProperties;
+
     return (
-        <div className="stats-card">
-            <div className="stats-icon" style={{ backgroundColor: color }} aria-hidden="true">
+        <div className="stats-card" style={style}>
+            <div className="stats-icon" aria-hidden="true">
                 {icon}
             </div>
             <div className="stats-content">

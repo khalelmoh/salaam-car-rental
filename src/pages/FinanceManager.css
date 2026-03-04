@@ -7,12 +7,14 @@
 }
 
 .transaction-form-card {
-    background-color: var(--surface);
+    background:
+        radial-gradient(circle at 94% -25%, rgba(14, 165, 233, 0.08), transparent 42%),
+        linear-gradient(180deg, #ffffff 0%, #f9fcff 100%);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     margin-bottom: 1rem;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
+    border: 1px solid #d5e2f1;
+    box-shadow: 0 12px 24px rgba(19, 34, 53, 0.08);
     animation: slideDown 0.3s ease-out;
 }
 
@@ -78,7 +80,7 @@
 }
 
 .finance-pagination-meta select {
-    border: 1px solid var(--border);
+    border: 1px solid #cbdcf0;
     border-radius: 8px;
     padding: 0.35rem 0.55rem;
     background: #fff;
@@ -108,7 +110,7 @@
 }
 
 .finance-page-jump-select {
-    border: 1px solid var(--border);
+    border: 1px solid #cbdcf0;
     border-radius: 8px;
     padding: 0.35rem 0.55rem;
     background: #fff;
@@ -125,15 +127,15 @@
     flex-wrap: wrap;
     gap: 0.75rem 1rem;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(90deg, #f7fbf9 0%, #eef8f5 100%);
+    border-bottom: 1px solid #dce8f5;
+    background: linear-gradient(90deg, #f4f9ff 0%, #eefbf6 56%, #fff6ea 100%);
 }
 
 .finance-report-summary span {
     font-size: 0.85rem;
     color: #0f172a;
     background: #ffffff;
-    border: 1px solid var(--border);
+    border: 1px solid #c9d9eb;
     border-radius: 999px;
     padding: 0.3rem 0.7rem;
 }
@@ -149,25 +151,25 @@
 }
 
 .finance-report-table th {
-    background: #f8fafc;
-    color: #334155;
+    background: linear-gradient(180deg, #f5f9ff 0%, #edf7f2 100%);
+    color: #355371;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     font-weight: 700;
     padding: 0.85rem 1rem;
-    border: 1px solid #dbe4ef;
+    border: 1px solid #d5e4f4;
 }
 
 .finance-report-table td {
     padding: 0.8rem 1rem;
     color: #0f172a;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e4ecf6;
     background: #ffffff;
 }
 
 .finance-report-table tbody tr:nth-child(even) td {
-    background: #fcfdff;
+    background: #fbfdff;
 }
 
 /* Print Styles */

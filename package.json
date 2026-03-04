@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "node --env-file=.env backend/server/main.js",
-    "start:prod": "node --env-file=.env backend/server/main.js",
+    "server": "node --env-file-if-exists=.env backend/server/main.js",
+    "start:prod": "node --env-file-if-exists=.env backend/server/main.js",
     "typecheck": "tsc -b --pretty false",
-    "test:api": "node --env-file=.env --test backend/server/tests/*.test.js",
+    "test:api": "node --env-file-if-exists=.env --test backend/server/tests/*.test.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

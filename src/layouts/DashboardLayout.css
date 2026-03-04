@@ -13,9 +13,12 @@
 
 .dashboard-header {
     min-height: 70px;
-    background: rgba(255, 255, 255, 0.92);
+    background:
+        radial-gradient(circle at 7% 20%, rgba(14, 165, 233, 0.11), transparent 34%),
+        radial-gradient(circle at 95% 70%, rgba(245, 158, 11, 0.14), transparent 35%),
+        rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(6px);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid #d7e4f2;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -27,7 +30,7 @@
 
 .dashboard-header h1 {
     font-size: 1.38rem;
-    color: var(--text-main);
+    color: #10263f;
     font-weight: 800;
     letter-spacing: -0.03em;
 }
@@ -53,9 +56,9 @@
     width: 36px;
     height: 36px;
     border-radius: 999px;
-    border: 1px solid var(--border);
-    background: #ffffff;
-    color: #334155;
+    border: 1px solid #c9daec;
+    background: linear-gradient(180deg, #ffffff 0%, #f2f8ff 100%);
+    color: #274666;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -64,8 +67,8 @@
 }
 
 .notification-btn:hover {
-    background: #f3f8f6;
-    border-color: var(--border-strong);
+    background: linear-gradient(180deg, #f5faff 0%, #e8f3ff 100%);
+    border-color: #aac6e3;
 }
 
 .notification-count {
@@ -90,8 +93,8 @@
     right: 0;
     width: 340px;
     max-height: 420px;
-    background: #ffffff;
-    border: 1px solid var(--border);
+    background: linear-gradient(180deg, #ffffff 0%, #f9fcff 100%);
+    border: 1px solid #d2e2f4;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     overflow: hidden;
@@ -100,8 +103,8 @@
 
 .notifications-panel-header {
     padding: 0.75rem 0.9rem;
-    border-bottom: 1px solid var(--border);
-    color: #0f172a;
+    border-bottom: 1px solid #dce8f5;
+    color: #132943;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -109,8 +112,8 @@
 }
 
 .notifications-clear-btn {
-    border: 1px solid var(--border);
-    background: #ffffff;
+    border: 1px solid #c9dced;
+    background: linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%);
     border-radius: 8px;
     color: #334155;
     font-size: 0.75rem;
@@ -136,7 +139,7 @@
 
 .notifications-item {
     padding: 0.75rem 0.9rem;
-    border-bottom: 1px solid #edf2f1;
+    border-bottom: 1px solid #e5edf7;
 }
 
 .notifications-item:last-child {
@@ -165,9 +168,9 @@
 }
 
 .notifications-panel-footer {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid #dce8f5;
     padding: 0.6rem 0.9rem;
-    background: #f7fbf9;
+    background: linear-gradient(110deg, #f4f9ff 0%, #eefbf5 55%, #fff6ea 100%);
 }
 
 .notifications-view-all {
@@ -184,8 +187,8 @@
 .avatar {
     width: 36px;
     height: 36px;
-    background: linear-gradient(140deg, #eeb586 0%, #de7f2f 100%);
-    color: #2a1c0d;
+    background: linear-gradient(140deg, #10b981 0%, #0ea5e9 100%);
+    color: #f8fffc;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -250,8 +253,8 @@
         right: 0;
         bottom: 0;
         height: 72px;
-        background: #ffffff;
-        border-top: 1px solid var(--border);
+        background: linear-gradient(180deg, #ffffff 0%, #f6fbff 100%);
+        border-top: 1px solid #d8e5f3;
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         z-index: 1200;
@@ -270,9 +273,9 @@
         font-weight: 600;
     }
 
-    .mobile-action-item.active {
-        color: var(--primary-dark);
-        background: #edf8f3;
+.mobile-action-item.active {
+        color: #0f6ea3;
+        background: linear-gradient(180deg, #e8f8ff 0%, #e8fbf3 100%);
     }
 }
 
