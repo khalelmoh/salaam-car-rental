@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 
 :root {
-  --primary: #0b8f63;
-  --primary-dark: #0a7a55;
-  --primary-soft: #e6f7f0;
+  --primary: #ad1a24;
+  --primary-dark: #8f131c;
+  --primary-soft: #fde9eb;
   --accent: #de7f2f;
   --accent-soft: #fdf0e3;
   --secondary: #132235;
@@ -21,7 +21,7 @@
 
   --border: #d7e2e0;
   --border-strong: #b7cbc5;
-  --focus-ring: 0 0 0 3px rgba(11, 143, 99, 0.2);
+  --focus-ring: 0 0 0 3px rgba(173, 26, 36, 0.2);
 
   --radius-xs: 0.35rem;
   --radius-sm: 0.55rem;
@@ -50,7 +50,7 @@
 body {
   font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
   background:
-    radial-gradient(circle at 7% 12%, rgba(11, 143, 99, 0.1), transparent 45%),
+    radial-gradient(circle at 7% 12%, rgba(173, 26, 36, 0.1), transparent 45%),
     radial-gradient(circle at 90% 85%, rgba(222, 127, 47, 0.12), transparent 42%),
     linear-gradient(140deg, var(--background) 0%, var(--background-alt) 100%);
   color: var(--text-main);

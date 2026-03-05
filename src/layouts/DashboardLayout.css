@@ -170,7 +170,7 @@
 .notifications-panel-footer {
     border-top: 1px solid #dce8f5;
     padding: 0.6rem 0.9rem;
-    background: linear-gradient(110deg, #f4f9ff 0%, #eefbf5 55%, #fff6ea 100%);
+    background: linear-gradient(110deg, #f4f9ff 0%, #fdeef0 55%, #fff6ea 100%);
 }
 
 .notifications-view-all {
@@ -187,7 +187,7 @@
 .avatar {
     width: 36px;
     height: 36px;
-    background: linear-gradient(140deg, #10b981 0%, #0ea5e9 100%);
+    background: linear-gradient(140deg, #ad1a24 0%, #0ea5e9 100%);
     color: #f8fffc;
     border-radius: 50%;
     display: flex;

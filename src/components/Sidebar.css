@@ -2,7 +2,7 @@
     width: 260px;
     height: 100vh;
     background:
-        radial-gradient(circle at 15% 10%, rgba(58, 207, 173, 0.2), transparent 32%),
+        radial-gradient(circle at 15% 10%, rgba(173, 26, 36, 0.24), transparent 32%),
         radial-gradient(circle at 88% 88%, rgba(250, 169, 72, 0.18), transparent 28%),
         linear-gradient(165deg, #102236 0%, #0d1a2e 56%, #0f2238 100%);
     color: var(--text-light);
@@ -31,12 +31,12 @@
     gap: 0.75rem;
     font-size: 1.14rem;
     font-weight: 700;
-    color: #d9fff1;
+    color: #ffe8ea;
     letter-spacing: -0.025em;
 }
 
 .logo-icon {
-    color: #7df2cb;
+    color: #ff7b84;
 }
 
 .sidebar-nav {
@@ -66,14 +66,14 @@
 }
 
 .nav-item:hover {
-    background: linear-gradient(120deg, rgba(125, 242, 203, 0.2) 0%, rgba(86, 138, 222, 0.18) 100%);
+    background: linear-gradient(120deg, rgba(173, 26, 36, 0.24) 0%, rgba(86, 138, 222, 0.18) 100%);
     color: var(--text-light);
 }
 
 .nav-item.active {
-    background: linear-gradient(135deg, #20b986 0%, #0f9fdd 100%);
+    background: linear-gradient(135deg, #ad1a24 0%, #0f9fdd 100%);
     color: #fff;
-    box-shadow: 0 12px 24px rgba(22, 128, 194, 0.35);
+    box-shadow: 0 12px 24px rgba(173, 26, 36, 0.35);
 }
 
 .nav-divider {

@@ -259,7 +259,7 @@ const FinanceManager = () => {
       )}
 
       <div className="stats-grid print-break-avoid reveal-up delay-1">
-        <StatsCard title="Total Income" value={`$${financials.income.toLocaleString()}`} icon={<TrendingUp size={24} />} color="#10b981" trend={{ value: 8, isPositive: true }} />
+        <StatsCard title="Total Income" value={`$${financials.income.toLocaleString()}`} icon={<TrendingUp size={24} />} color="#ad1a24" trend={{ value: 8, isPositive: true }} />
         <StatsCard title="Total Expenses" value={`$${financials.expenses.toLocaleString()}`} icon={<TrendingDown size={24} />} color="#ef4444" trend={{ value: 3, isPositive: false }} />
         <StatsCard title="Net Profit" value={`$${financials.netProfit.toLocaleString()}`} icon={<DollarSign size={24} />} color="#3b82f6" trend={{ value: 12, isPositive: true }} />
         <StatsCard title="Pending Payments" value={`$${financials.pendingAmount.toLocaleString()}`} icon={<CreditCard size={24} />} color="#f59e0b" />

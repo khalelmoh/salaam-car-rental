@@ -3,13 +3,13 @@
 }
 
 .action-btn.success {
-    color: #0a7a55;
-    border-color: #cdeedd;
-    background: #ecfbf3;
+    color: #8f131c;
+    border-color: #f5cdd1;
+    background: #fdeef0;
 }
 
 .action-btn.success:hover {
-    background-color: #daf7e9;
+    background-color: #fbdde0;
 }
 
 .action-btn.danger {
@@ -40,8 +40,8 @@
 /* Badge Outlines */
 .badge-success-outline {
     background-color: transparent;
-    color: #10b981;
-    border: 1px solid #10b981;
+    color: #ad1a24;
+    border: 1px solid #ad1a24;
 }
 
 .badge-warning-outline {

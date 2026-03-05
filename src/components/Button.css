@@ -43,9 +43,9 @@
 
 /* Variants */
 .btn-primary {
-    background: linear-gradient(140deg, var(--primary) 0%, #16a772 100%);
+    background: linear-gradient(140deg, var(--primary) 0%, #8f131c 100%);
     color: #ffffff;
-    border-color: rgba(11, 143, 99, 0.35);
+    border-color: rgba(173, 26, 36, 0.35);
 }
 
 .btn-primary:hover {

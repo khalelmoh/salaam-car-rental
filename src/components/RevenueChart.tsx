@@ -12,7 +12,7 @@ const RevenueChart = ({ data }: RevenueChartProps) => {
                     <defs>
                         <linearGradient id="revenueLine" x1="0" y1="0" x2="1" y2="0">
                             <stop offset="0%" stopColor="#0ea5e9" />
-                            <stop offset="100%" stopColor="#10b981" />
+                            <stop offset="100%" stopColor="#ad1a24" />
                         </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#dbe7f4" />
@@ -44,7 +44,7 @@ const RevenueChart = ({ data }: RevenueChartProps) => {
                         stroke="url(#revenueLine)"
                         strokeWidth={3}
                         dot={{ r: 4, fill: '#0ea5e9', strokeWidth: 2, stroke: '#fff' }}
-                        activeDot={{ r: 7, fill: '#10b981', stroke: '#ffffff', strokeWidth: 2 }}
+                        activeDot={{ r: 7, fill: '#ad1a24', stroke: '#ffffff', strokeWidth: 2 }}
                     />
                 </LineChart>
             </ResponsiveContainer>

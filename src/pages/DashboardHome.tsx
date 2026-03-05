@@ -117,7 +117,7 @@ const DashboardHome = () => {
                     title="Total Revenue"
                     value={`$${(dashboard?.totalRevenue ?? 0).toLocaleString()}`}
                     icon={<DollarSign size={24} />}
-                    color="#10b981"
+                    color="#ad1a24"
                     trend={{ value: 8, isPositive: true }}
                 />
                 <StatsCard
