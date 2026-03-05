@@ -4,6 +4,7 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import Button from '../components/Button';
 import { api } from '../lib/api';
 import { notifyDataChanged } from '../utils/realtime';
+import { formatDateTimeDMY } from '../utils/date';
 import type { NotificationItem } from '../types/models';
 import './Notifications.css';
 
@@ -94,7 +95,7 @@ const Notifications = () => {
           {notifications.map((item) => (
             <article className="notifications-page-item" key={item.id}>
               <div className="notifications-page-item-message">{item.message}</div>
-              <div className="notifications-page-item-time">{new Date(item.timestamp).toLocaleString()}</div>
+              <div className="notifications-page-item-time">{formatDateTimeDMY(item.timestamp)}</div>
             </article>
           ))}
         </div>

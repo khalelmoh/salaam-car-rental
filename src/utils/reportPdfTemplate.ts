@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { formatDateTimeDMY } from './date';
 
 interface ReportFilterItem {
   label: string;
@@ -28,7 +29,7 @@ interface ReportPdfOptions {
 
 export function downloadStyledReportPdf(options: ReportPdfOptions) {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
-  const generatedAt = options.generatedAt || new Date().toLocaleString();
+  const generatedAt = options.generatedAt || formatDateTimeDMY(new Date());
   const companyName = options.companyName || 'Salaam Car Rental';
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();

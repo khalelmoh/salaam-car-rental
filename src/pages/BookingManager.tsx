@@ -8,6 +8,7 @@ import type { Booking, Customer, DiscountType, ManagedCar } from '../types/model
 import { downloadStyledReportPdf } from '../utils/reportPdfTemplate';
 import { notifyDataChanged } from '../utils/realtime';
 import { useToast } from '../hooks/useToast';
+import { formatDateDMY } from '../utils/date';
 import './BookingManager.css';
 
 const BookingManager = () => {
@@ -253,9 +254,9 @@ const BookingManager = () => {
       b.id,
       getCustomerName(b.customerId),
       getCarName(b.carId),
-      b.startDate,
+      formatDateDMY(b.startDate),
       b.startTime || '--',
-      b.endDate,
+      formatDateDMY(b.endDate),
       b.endTime || '--',
       `$${Number(b.totalAmount).toFixed(2)}`,
       b.status,
@@ -458,9 +459,9 @@ const BookingManager = () => {
                   <td>{getCarName(booking.carId)}</td>
                   <td>
                     <div className="date-range">
-                      <span>{booking.startDate}</span>
+                      <span>{formatDateDMY(booking.startDate)}</span>
                       <span className="text-muted"> to </span>
-                      <span>{booking.endDate}</span>
+                      <span>{formatDateDMY(booking.endDate)}</span>
                     </div>
                   </td>
                   <td>

@@ -8,6 +8,7 @@ import type { Booking, Transaction, TransactionType } from '../types/models';
 import { notifyDataChanged } from '../utils/realtime';
 import { useToast } from '../hooks/useToast';
 import { downloadStyledReportPdf } from '../utils/reportPdfTemplate';
+import { formatDateDMY } from '../utils/date';
 import './FinanceManager.css';
 
 const normalizeType = (value: string): TransactionType =>
@@ -181,7 +182,7 @@ const FinanceManager = () => {
   const handleDownloadReport = () => {
     const rows = transactions.map((trx) => ([
         trx.id,
-        trx.date,
+        formatDateDMY(trx.date),
         trx.description,
         trx.category,
         trx.type,
@@ -307,7 +308,7 @@ const FinanceManager = () => {
                 paginatedTransactions.map((trx) => (
                   <tr key={trx.id}>
                     <td className="font-medium text-sm text-muted">{trx.id}</td>
-                    <td>{trx.date}</td>
+                    <td>{formatDateDMY(trx.date)}</td>
                     <td>
                       {trx.description}
                       {trx.bookingId ? <div className="text-muted text-sm">Linked booking: {trx.bookingId}</div> : null}

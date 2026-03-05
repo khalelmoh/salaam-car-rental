@@ -1,3 +1,5 @@
+import { formatDateTimeDMY } from './date';
+
 interface PdfColumn {
   key: string;
   label: string;
@@ -66,7 +68,7 @@ export const createPdfReport = (input: PdfReportInput) => {
   const lineHeight = input.page?.lineHeight || 13;
   const estimatedMaxChars = orientation === 'landscape' ? 160 : 110;
   const companyName = input.companyName || 'SALAAM CAR RENTAL';
-  const generatedAt = input.generatedAt || new Date().toLocaleString();
+  const generatedAt = input.generatedAt || formatDateTimeDMY(new Date());
   const reportRef = `RPT-${Date.now().toString().slice(-8)}`;
 
   const lines: string[] = [];

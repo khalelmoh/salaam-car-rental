@@ -7,6 +7,7 @@ import FleetStatusChart from '../components/FleetStatusChart';
 import { api } from '../lib/api';
 import type { Booking, DashboardPayload, Transaction, TransactionType } from '../types/models';
 import { onDataChanged } from '../utils/realtime';
+import { formatDateTimeDMY } from '../utils/date';
 import './DashboardHome.css';
 
 const normalizeType = (value: string): TransactionType =>
@@ -160,7 +161,7 @@ const DashboardHome = () => {
                                 <li className="activity-item" key={act.id}>
                                     <span className="dot bg-green"></span>
                                     <span>{act.message}</span>
-                                    <span className="time">{new Date(act.timestamp).toLocaleString()}</span>
+                                    <span className="time">{formatDateTimeDMY(act.timestamp)}</span>
                                 </li>
                             ))
                         )}

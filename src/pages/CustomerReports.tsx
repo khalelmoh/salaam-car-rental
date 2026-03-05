@@ -6,6 +6,7 @@ import Button from '../components/Button';
 import { api } from '../lib/api';
 import type { Booking, Customer, ManagedCar } from '../types/models';
 import { downloadStyledReportPdf } from '../utils/reportPdfTemplate';
+import { formatDateDMY } from '../utils/date';
 import './CustomerManager.css';
 import './CustomerReports.css';
 
@@ -93,7 +94,7 @@ const CustomerReports = () => {
   }, [selectedCustomerBookings]);
 
   const getCarName = (carId: string) => cars.find((car) => car.id === carId)?.name || carId;
-  const getBookingDateRange = (booking: Booking) => `${booking.startDate}${booking.endDate ? ` -> ${booking.endDate}` : ''}`;
+  const getBookingDateRange = (booking: Booking) => `${formatDateDMY(booking.startDate)}${booking.endDate ? ` -> ${formatDateDMY(booking.endDate)}` : ''}`;
 
   const handleDownloadSingleCustomerReport = () => {
     if (!selectedReportCustomer) return;

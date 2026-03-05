@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar';
 import { getStoredUser } from '../lib/auth';
 import { api } from '../lib/api';
 import { notifyDataChanged } from '../utils/realtime';
+import { formatDateTimeDMY } from '../utils/date';
 import type { NotificationItem } from '../types/models';
 import './DashboardLayout.css';
 
@@ -125,7 +126,7 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
                                                 {notifications.map((item) => (
                                                     <li key={item.id} className="notifications-item">
                                                         <div className="notifications-message">{item.message}</div>
-                                                        <div className="notifications-time">{new Date(item.timestamp).toLocaleString()}</div>
+                                                        <div className="notifications-time">{formatDateTimeDMY(item.timestamp)}</div>
                                                     </li>
                                                 ))}
                                             </ul>
