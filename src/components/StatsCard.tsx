@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import './StatsCard.css';
 
 interface StatsCardProps {
@@ -9,23 +9,13 @@ interface StatsCardProps {
         value: number;
         isPositive: boolean;
     };
-    trendLabel?: string;
     color?: string;
 }
 
-const StatsCard = ({
-    title,
-    value,
-    icon,
-    trend,
-    trendLabel = 'from last month',
-    color = 'var(--primary)',
-}: StatsCardProps) => {
-    const style = { '--card-accent': color } as CSSProperties;
-
+const StatsCard = ({ title, value, icon, trend, color = 'var(--primary)' }: StatsCardProps) => {
     return (
-        <div className="stats-card" style={style}>
-            <div className="stats-icon" aria-hidden="true">
+        <div className="stats-card">
+            <div className="stats-icon" style={{ backgroundColor: color }} aria-hidden="true">
                 {icon}
             </div>
             <div className="stats-content">
@@ -33,8 +23,8 @@ const StatsCard = ({
                 <div className="stats-value">{value}</div>
                 {trend && (
                     <div className={`stats-trend ${trend.isPositive ? 'positive' : 'negative'}`}>
-                        <span className="stats-trend-arrow">{trend.isPositive ? '+' : '-'}</span>
-                        <span>{Math.abs(trend.value)}% {trendLabel}</span>
+                        <span className="stats-trend-arrow">{trend.isPositive ? '↑' : '↓'}</span>
+                        <span>{Math.abs(trend.value)}% from last month</span>
                     </div>
                 )}
             </div>

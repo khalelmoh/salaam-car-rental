@@ -33,7 +33,7 @@ const FleetManager = () => {
                 setError(err instanceof Error ? err.message : 'Failed to load fleet.');
             } finally {
                 setIsLoading(false);
-            }
+            } 
         };
         load();
         const unsubscribe = onDataChanged(load);

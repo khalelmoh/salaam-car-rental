@@ -45,7 +45,6 @@ const CarTable = ({ cars, onEdit, onDelete, onViewReport }: CarTableProps) => {
                                         <img src={car.image} alt={car.name} className="cell-image" />
                                         <div className="cell-info">
                                             <span className="font-medium">{car.name}</span>
-                                            <span className="text-muted text-sm">{car.transmission}</span>
                                         </div>
                                     </div>
                                 </td>
