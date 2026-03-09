@@ -63,16 +63,21 @@ test('bookings: rejects invalid payload', async () => {
 });
 
 test('transactions: create/list/delete expense flow', async () => {
-  const today = new Date().toISOString().slice(0, 10);
+  const transactionDate = '2105-01-15';
+  const carsRes = await request(app).get('/api/cars').set('Authorization', `Bearer ${authToken}`);
+  assert.equal(carsRes.status, 200);
+  assert.ok(Array.isArray(carsRes.body) && carsRes.body.length > 0);
+  const car = carsRes.body[0];
   const created = await request(app)
     .post('/api/transactions')
     .set('Authorization', `Bearer ${authToken}`)
     .send({
-      date: today,
+      date: transactionDate,
       description: 'Integration test expense',
       type: 'Expense',
       amount: 12.5,
       category: 'Testing',
+      carId: car.id,
     });
 
   assert.equal(created.status, 201);
@@ -232,12 +237,12 @@ test('reports/finance applies paid-pending-commission rules', async () => {
   assert.equal(Number(paidReport.body.summary?.income || 0), Number((baseIncome + bookingAmount).toFixed(2)));
   assert.equal(Number(paidReport.body.summary?.pendingAmount || 0), basePending);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const transactionDate = '2105-01-15';
   const commissionCreate = await request(app)
     .post('/api/transactions')
     .set('Authorization', `Bearer ${authToken}`)
     .send({
-      date: today,
+      date: transactionDate,
       description: 'Integration test commission',
       type: 'Commission',
       amount: 7,
@@ -261,6 +266,44 @@ test('reports/finance applies paid-pending-commission rules', async () => {
     .delete(`/api/bookings/${bookingId}`)
     .set('Authorization', `Bearer ${authToken}`);
   assert.equal(deleteBooking.status, 200);
+});
+
+test('car report includes car-linked expense transactions', async () => {
+  const carsRes = await request(app).get('/api/cars').set('Authorization', `Bearer ${authToken}`);
+  assert.equal(carsRes.status, 200);
+  assert.ok(Array.isArray(carsRes.body) && carsRes.body.length > 0);
+  const car = carsRes.body[0];
+
+  const day = '2103-02-14';
+  const baseReport = await request(app)
+    .get(`/api/cars/${car.id}/report?period=range&from=${day}&to=${day}`)
+    .set('Authorization', `Bearer ${authToken}`);
+  assert.equal(baseReport.status, 200);
+  const before = Number(baseReport.body.summary?.totalExpenses || 0);
+
+  const expenseCreate = await request(app)
+    .post('/api/transactions')
+    .set('Authorization', `Bearer ${authToken}`)
+    .send({
+      date: day,
+      description: 'Car report expense verification',
+      type: 'Expense',
+      amount: 19,
+      category: 'Maintenance',
+      carId: car.id,
+    });
+  assert.equal(expenseCreate.status, 201);
+
+  const updatedReport = await request(app)
+    .get(`/api/cars/${car.id}/report?period=range&from=${day}&to=${day}`)
+    .set('Authorization', `Bearer ${authToken}`);
+  assert.equal(updatedReport.status, 200);
+  assert.equal(Number(updatedReport.body.summary?.totalExpenses || 0), Number((before + 19).toFixed(2)));
+
+  const cleanup = await request(app)
+    .delete(`/api/transactions/${expenseCreate.body.id}`)
+    .set('Authorization', `Bearer ${authToken}`);
+  assert.equal(cleanup.status, 200);
 });
 
 test('reports phase-2 endpoints: customers, fleet, presets, async jobs', async () => {
@@ -447,6 +490,7 @@ test('reports golden dataset snapshots + edge cases + export jobs', async () => 
         type: 'Expense',
         amount: 30,
         category: 'Operations',
+        carId: car.id,
       });
     assert.equal(expenseCreate.status, 201);
     cleanup.transactionIds.push(expenseCreate.body.id);

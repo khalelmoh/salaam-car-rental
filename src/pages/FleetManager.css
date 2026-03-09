@@ -5,12 +5,12 @@
     gap: 1rem;
     margin-bottom: 1.1rem;
     background:
-        radial-gradient(circle at 8% 18%, rgba(14, 165, 233, 0.14), transparent 42%),
-        linear-gradient(155deg, #ffffff 0%, #f2faff 58%, #f3fbf7 100%);
+        radial-gradient(circle at 8% 18%, rgba(191, 163, 122, 0.22), transparent 42%),
+        linear-gradient(155deg, #fffefb 0%, #f8f1e5 58%, #f5ecdd 100%);
     padding: 1rem 1.1rem;
     border-radius: var(--radius-lg);
-    border: 1px solid #d3e2f2;
-    box-shadow: 0 12px 22px rgba(19, 34, 53, 0.08);
+    border: 1px solid #e1d6c6;
+    box-shadow: 0 12px 22px rgba(62, 47, 38, 0.1);
 }
 
 .control-group {
@@ -25,8 +25,8 @@
     padding: 0.62rem 0.9rem;
     width: min(100%, 260px);
     font-size: 0.9rem;
-    border-color: #cbdcf0;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border-color: #dbcdb9;
+    background: linear-gradient(180deg, #fffefb 0%, #f8f1e5 100%);
 }
 
 .table-search:focus {
@@ -38,13 +38,13 @@
     font-size: 0.9rem;
     cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2366788f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%237f7368' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 0.5rem center;
     background-repeat: no-repeat;
     background-size: 1.5em 1.5em;
     min-width: 140px;
-    border-color: #cbdcf0;
-    background-color: #fff;
+    border-color: #dbcdb9;
+    background-color: #fffefb;
 }
 
 .table-select:focus {

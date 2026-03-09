@@ -42,7 +42,8 @@ export function createApp() {
 
   app.use((error, _req, res, _next) => {
     const message = error instanceof Error ? error.message : 'Unexpected server error.';
-    sendError(res, 500, 'INTERNAL_ERROR', message);
+    const statusCode = Number(error?.statusCode || 500);
+    sendError(res, statusCode, statusCode === 500 ? 'INTERNAL_ERROR' : 'REQUEST_ERROR', message);
   });
 
   return app;

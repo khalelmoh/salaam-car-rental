@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Lock, Mail } from 'lucide-react';
 import Button from '../components/Button';
 import { login } from '../lib/auth';
@@ -79,6 +79,9 @@ const Login = () => {
                         {isLoading ? 'Signing in...' : 'Sign In'}
                     </Button>
 
+                    <div className="login-footer">
+                        <Link to="/forgot-password" className="login-link">Forgot password?</Link>
+                    </div>
                 </form>
             </div>
         </div>

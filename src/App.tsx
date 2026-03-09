@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import DashboardHome from './pages/DashboardHome';
 import FleetManager from './pages/FleetManager';
 import Fleet from './pages/Fleet';
@@ -20,6 +22,8 @@ function App() {
         <div className="app">
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             <Route path="/" element={<ProtectedRoute><DashboardHome /></ProtectedRoute>} />
             <Route path="/fleet" element={<ProtectedRoute><FleetManager /></ProtectedRoute>} />

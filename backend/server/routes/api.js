@@ -5,6 +5,7 @@ import * as legacyController from '../controllers/apiController.js';
 import * as authController from '../controllers/authController.js';
 import * as bookingController from '../controllers/bookingController.js';
 import * as transactionController from '../controllers/transactionController.js';
+import * as financeCloseController from '../controllers/financeCloseController.js';
 import * as systemController from '../controllers/systemController.js';
 import * as docsController from '../controllers/docsController.js';
 import * as reportController from '../controllers/reportController.js';
@@ -14,6 +15,8 @@ const router = Router();
 router.get('/health', authController.health);
 router.get('/api/health', authController.health);
 router.post('/api/auth/login', authController.login);
+router.post('/api/auth/forgot-password', authController.forgotPassword);
+router.post('/api/auth/reset-password', authController.resetPassword);
 router.get('/api/openapi.json', docsController.openApiJson);
 router.get('/api/docs', docsController.docsUi);
 
@@ -50,6 +53,9 @@ router.get('/api/transactions', transactionController.listTransactions);
 router.post('/api/transactions', requireRole('admin', 'manager'), transactionController.createTransaction);
 router.put('/api/transactions/:id', requireRole('admin', 'manager'), transactionController.updateTransaction);
 router.delete('/api/transactions/:id', requireRole('admin', 'manager'), transactionController.deleteTransaction);
+router.get('/api/finance/closes', requireRole('admin', 'manager'), financeCloseController.listCloseOverview);
+router.post('/api/finance/close/daily', requireRole('admin', 'manager'), financeCloseController.closeDaily);
+router.post('/api/finance/close/monthly', requireRole('admin', 'manager'), financeCloseController.closeMonthly);
 
 router.get('/api/settings', requireRole('admin', 'manager'), systemController.getSettings);
 router.put('/api/settings', requireRole('admin'), systemController.updateSettings);

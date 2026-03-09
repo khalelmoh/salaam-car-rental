@@ -2,13 +2,16 @@ import { z } from 'zod';
 import { pool } from '../db/pool.js';
 import { logAudit } from '../services/auditService.js';
 import {
+  makeId,
   makeToken,
+  hashResetToken,
   sanitizeUser,
   hashPassword,
   verifyPassword,
   SESSION_TTL_HOURS,
 } from '../services/security.js';
 import { sendError } from '../services/http.js';
+import { isSmtpConfigured, sendPasswordResetEmail } from '../services/mailer.js';
 
 const profileSchema = z.object({
   username: z.string().min(1).optional(),
@@ -19,11 +22,21 @@ const profileSchema = z.object({
   newPassword: z.string().min(8).optional(),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  newPassword: z.string().min(8),
+});
+
 const LOGIN_RATE_LIMIT_WINDOW_MS = Number(process.env.LOGIN_RATE_LIMIT_WINDOW_MS || 60_000);
 const LOGIN_RATE_LIMIT_MAX_REQUESTS = Number(process.env.LOGIN_RATE_LIMIT_MAX_REQUESTS || 30);
 const LOGIN_ATTEMPT_WINDOW_MS = Number(process.env.LOGIN_ATTEMPT_WINDOW_MS || 15 * 60_000);
 const LOGIN_MAX_ATTEMPTS = Number(process.env.LOGIN_MAX_ATTEMPTS || 10);
 const LOGIN_LOCKOUT_MS = Number(process.env.LOGIN_LOCKOUT_MS || 15 * 60_000);
+const PASSWORD_RESET_TOKEN_TTL_MINUTES = Number(process.env.PASSWORD_RESET_TOKEN_TTL_MINUTES || 30);
 
 const ipRateWindow = new Map();
 const loginAttempts = new Map();
@@ -203,6 +216,122 @@ export async function updateProfile(req, res, next) {
 
     await logAudit({ userId: req.auth.userId, action: 'profile_update', entity: 'user', entityId: user.id });
     res.json({ user: sanitizeUser(joined.rows[0]) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function forgotPassword(req, res, next) {
+  try {
+    const parsed = forgotPasswordSchema.safeParse(req.body || {});
+    if (!parsed.success) {
+      return sendError(res, 400, 'VALIDATION_ERROR', parsed.error.issues[0]?.message || 'Invalid forgot password payload.');
+    }
+
+    const email = String(parsed.data.email).toLowerCase();
+    const user = await findUserByIdentifier(email);
+
+    // Always return success to prevent user enumeration.
+    const genericResponse = {
+      success: true,
+      message: 'If the account exists, a password reset link has been generated.',
+    };
+
+    if (!user) {
+      return res.json(genericResponse);
+    }
+
+    const resetToken = makeToken();
+    const tokenHash = hashResetToken(resetToken);
+    const expiresAt = new Date(Date.now() + PASSWORD_RESET_TOKEN_TTL_MINUTES * 60 * 1000);
+
+    await pool.query('DELETE FROM password_reset_tokens WHERE user_id = $1 OR expires_at < NOW() OR used_at IS NOT NULL', [user.id]);
+    await pool.query(
+      `INSERT INTO password_reset_tokens (id, user_id, token_hash, expires_at)
+       VALUES ($1, $2, $3, $4::timestamptz)`,
+      [makeId('PRT'), user.id, tokenHash, expiresAt.toISOString()]
+    );
+
+    await logAudit({ userId: user.id, action: 'password_reset_requested', entity: 'auth', entityId: user.id });
+
+    const appBase = process.env.APP_BASE_URL || process.env.CORS_ORIGIN || 'http://localhost:5173';
+    const resetUrl = `${String(appBase).replace(/\/+$/, '')}/reset-password?token=${encodeURIComponent(resetToken)}`;
+    const smtpConfigured = isSmtpConfigured();
+    let emailDelivered = false;
+
+    if (smtpConfigured) {
+      try {
+        await sendPasswordResetEmail({
+          to: user.email,
+          resetUrl,
+          expiresMinutes: PASSWORD_RESET_TOKEN_TTL_MINUTES,
+        });
+        emailDelivered = true;
+      } catch (error) {
+        await logAudit({
+          userId: user.id,
+          action: 'password_reset_email_failed',
+          entity: 'auth',
+          entityId: user.id,
+          details: { error: String(error instanceof Error ? error.message : error) },
+        });
+      }
+    }
+
+    if (process.env.NODE_ENV !== 'production' && !emailDelivered) {
+      return res.json({
+        ...genericResponse,
+        resetToken,
+        resetUrl,
+        expiresAt: expiresAt.toISOString(),
+      });
+    }
+
+    return res.json(genericResponse);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function resetPassword(req, res, next) {
+  try {
+    const parsed = resetPasswordSchema.safeParse(req.body || {});
+    if (!parsed.success) {
+      return sendError(res, 400, 'VALIDATION_ERROR', parsed.error.issues[0]?.message || 'Invalid reset password payload.');
+    }
+
+    const tokenHash = hashResetToken(parsed.data.token);
+    const { rows } = await pool.query(
+      `SELECT prt.id, prt.user_id
+       FROM password_reset_tokens prt
+       WHERE prt.token_hash = $1
+         AND prt.used_at IS NULL
+         AND prt.expires_at > NOW()
+       LIMIT 1`,
+      [tokenHash]
+    );
+
+    if (!rows[0]) {
+      return sendError(res, 400, 'AUTH_INVALID_RESET_TOKEN', 'Reset token is invalid or expired.');
+    }
+
+    const resetRow = rows[0];
+    const newPasswordHash = await hashPassword(parsed.data.newPassword);
+
+    await pool.query('BEGIN');
+    try {
+      await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [newPasswordHash, resetRow.user_id]);
+      await pool.query('UPDATE password_reset_tokens SET used_at = NOW() WHERE id = $1', [resetRow.id]);
+      await pool.query('DELETE FROM password_reset_tokens WHERE user_id = $1 AND id <> $2', [resetRow.user_id, resetRow.id]);
+      await pool.query('DELETE FROM sessions WHERE user_id = $1', [resetRow.user_id]);
+      await logAudit({ userId: resetRow.user_id, action: 'password_reset_completed', entity: 'auth', entityId: resetRow.user_id });
+      await pool.query('COMMIT');
+    } catch (error) {
+      await pool.query('ROLLBACK');
+      throw error;
+    }
+
+    res.json({ success: true, message: 'Password has been reset successfully.' });
   } catch (error) {
     next(error);
   }

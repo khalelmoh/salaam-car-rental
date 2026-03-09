@@ -118,7 +118,7 @@ const CarReportModal = ({ carId, isOpen, onClose }: CarReportModalProps) => {
 
       downloadStyledReportPdf({
         title: `${report.car.name} - Performance Report`,
-        summaryLine: `Rentals: ${report.summary.totalRentals}   Revenue: ${formatCurrency(report.summary.totalRevenue)}   Avg/Rental: ${formatCurrency(report.summary.averageRevenuePerRental)}`,
+        summaryLine: `Rentals: ${report.summary.totalRentals}   Revenue: ${formatCurrency(report.summary.totalRevenue)}   Expenses: ${formatCurrency(report.summary.totalExpenses)}   Avg/Rental: ${formatCurrency(report.summary.averageRevenuePerRental)}`,
         filters: [
           { label: 'Car ID', value: report.car.id },
           { label: 'Period', value: filterSummary },
@@ -127,6 +127,7 @@ const CarReportModal = ({ carId, isOpen, onClose }: CarReportModalProps) => {
           { label: 'Total Rentals', value: report.summary.totalRentals },
           { label: 'Days Rented', value: report.summary.totalDaysRented },
           { label: 'Total Revenue', value: formatCurrency(report.summary.totalRevenue) },
+          { label: 'Total Expenses', value: formatCurrency(report.summary.totalExpenses) },
           { label: 'Current Status', value: report.car.status },
         ],
         headers: ['Booking', 'Customer', 'Start', 'End', 'Days', 'Amount', 'Status', 'Payment'],
@@ -294,6 +295,10 @@ const CarReportModal = ({ carId, isOpen, onClose }: CarReportModalProps) => {
               <div className="report-summary-card">
                 <span>Average / Rental</span>
                 <strong>{formatCurrency(report.summary.averageRevenuePerRental)}</strong>
+              </div>
+              <div className="report-summary-card">
+                <span>Total Expenses</span>
+                <strong>{formatCurrency(report.summary.totalExpenses)}</strong>
               </div>
               <div className="report-summary-card">
                 <span>Current Status</span>

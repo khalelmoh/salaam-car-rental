@@ -23,13 +23,13 @@
 }
 
 .action-btn.primary {
-    color: #185fa8;
-    border-color: #d4e6f9;
-    background: #f1f8ff;
+    color: #3e2f26;
+    border-color: #decfb8;
+    background: #f8f0e4;
 }
 
 .action-btn.primary:hover {
-    background-color: #dff0ff;
+    background-color: #efe1cc;
 }
 
 .action-btn.disabled {
@@ -46,30 +46,30 @@
 
 .badge-warning-outline {
     background-color: transparent;
-    color: #f59e0b;
-    border: 1px solid #f59e0b;
+    color: #a57f4d;
+    border: 1px solid #a57f4d;
 }
 
 .badge-primary {
-    background-color: #dbeafe;
-    color: #1e40af;
+    background-color: #efe4d3;
+    color: #5b4738;
 }
 
 .badge-neutral {
-    background-color: #f1f5f9;
-    color: #64748b;
+    background-color: #f6efe3;
+    color: #7f7368;
 }
 
 /* Booking Form Styles */
 .booking-form-card {
     background:
-        radial-gradient(circle at 95% -24%, rgba(14, 165, 233, 0.08), transparent 40%),
-        linear-gradient(180deg, #ffffff 0%, #f9fcff 100%);
+        radial-gradient(circle at 95% -24%, rgba(191, 163, 122, 0.16), transparent 40%),
+        linear-gradient(180deg, #fffefb 0%, #f8f2e8 100%);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     margin-bottom: 1rem;
-    border: 1px solid #d5e2f1;
-    box-shadow: 0 12px 24px rgba(19, 34, 53, 0.08);
+    border: 1px solid #e1d6c6;
+    box-shadow: 0 12px 24px rgba(62, 47, 38, 0.1);
     animation: slideDown 0.3s ease-out;
 }
 
@@ -89,7 +89,7 @@
     margin-bottom: 1rem;
     font-size: 1.02rem;
     color: var(--text-main);
-    border-bottom: 1px solid #dce8f5;
+    border-bottom: 1px solid #e8dece;
     padding-bottom: 0.75rem;
 }
 
@@ -116,8 +116,8 @@
     padding: 0.65rem 0.7rem;
     font-size: 0.9rem;
     transition: border-color 0.2s, box-shadow 0.2s;
-    background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
-    border-color: #cdddf0;
+    background: linear-gradient(180deg, #fffefb 0%, #f8f1e5 100%);
+    border-color: #dbcdb9;
 }
 
 .form-input:focus {
@@ -130,7 +130,7 @@
     align-items: center;
     gap: 1rem;
     padding-top: 0.8rem;
-    border-top: 1px solid #dce8f5;
+    border-top: 1px solid #e8dece;
     flex-wrap: wrap;
 }
 
@@ -177,10 +177,10 @@
 }
 
 .booking-pagination-meta select {
-    border: 1px solid #cbdcf0;
+    border: 1px solid #dbcdb9;
     border-radius: 8px;
     padding: 0.35rem 0.55rem;
-    background: #fff;
+    background: #fffefb;
     font-size: 0.85rem;
 }
 
@@ -207,10 +207,10 @@
 }
 
 .booking-page-jump-select {
-    border: 1px solid #cbdcf0;
+    border: 1px solid #dbcdb9;
     border-radius: 8px;
     padding: 0.35rem 0.55rem;
-    background: #fff;
+    background: #fffefb;
     font-size: 0.85rem;
     min-width: 64px;
 }

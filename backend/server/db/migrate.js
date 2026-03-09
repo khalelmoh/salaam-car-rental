@@ -31,6 +31,15 @@ export async function runMigrations() {
       expires_at TIMESTAMPTZ NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token_hash TEXT NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      used_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
     CREATE TABLE IF NOT EXISTS cars (
       id TEXT PRIMARY KEY,
       branch_id TEXT REFERENCES branches(id) ON DELETE SET NULL,
@@ -93,11 +102,71 @@ export async function runMigrations() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
+    CREATE TABLE IF NOT EXISTS accounts (
+      id TEXT PRIMARY KEY,
+      code TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      account_type TEXT NOT NULL CHECK (account_type IN ('asset', 'liability', 'equity', 'revenue', 'expense')),
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS journal_entries (
+      id TEXT PRIMARY KEY,
+      entry_date DATE NOT NULL,
+      reference_type TEXT NOT NULL CHECK (reference_type IN ('payment', 'expense')),
+      reference_id TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      created_by TEXT REFERENCES users(id) ON DELETE SET NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (reference_type, reference_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS journal_lines (
+      id BIGSERIAL PRIMARY KEY,
+      entry_id TEXT NOT NULL REFERENCES journal_entries(id) ON DELETE CASCADE,
+      account_id TEXT NOT NULL REFERENCES accounts(id),
+      line_type TEXT NOT NULL CHECK (line_type IN ('debit', 'credit')),
+      amount NUMERIC(14,2) NOT NULL CHECK (amount > 0),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS daily_closes (
+      id TEXT PRIMARY KEY,
+      close_date DATE NOT NULL UNIQUE,
+      opening_balance NUMERIC(14,2) NOT NULL DEFAULT 0,
+      total_debits NUMERIC(14,2) NOT NULL DEFAULT 0,
+      total_credits NUMERIC(14,2) NOT NULL DEFAULT 0,
+      closing_balance NUMERIC(14,2) NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'closed' CHECK (status IN ('draft', 'closed', 'reconciled')),
+      is_locked BOOLEAN NOT NULL DEFAULT TRUE,
+      closed_by TEXT REFERENCES users(id) ON DELETE SET NULL,
+      closed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS monthly_closes (
+      id TEXT PRIMARY KEY,
+      close_year INTEGER NOT NULL CHECK (close_year >= 2000),
+      close_month INTEGER NOT NULL CHECK (close_month BETWEEN 1 AND 12),
+      opening_balance NUMERIC(14,2) NOT NULL DEFAULT 0,
+      total_debits NUMERIC(14,2) NOT NULL DEFAULT 0,
+      total_credits NUMERIC(14,2) NOT NULL DEFAULT 0,
+      closing_balance NUMERIC(14,2) NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'closed' CHECK (status IN ('draft', 'closed', 'reconciled')),
+      is_locked BOOLEAN NOT NULL DEFAULT TRUE,
+      closed_by TEXT REFERENCES users(id) ON DELETE SET NULL,
+      closed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (close_year, close_month)
+    );
+
     CREATE TABLE IF NOT EXISTS expenses (
       id TEXT PRIMARY KEY,
       amount NUMERIC(12,2) NOT NULL,
       description TEXT NOT NULL,
       category TEXT NOT NULL,
+      car_id TEXT REFERENCES cars(id) ON DELETE SET NULL,
       expense_date DATE NOT NULL,
       created_by TEXT REFERENCES users(id) ON DELETE SET NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -153,15 +222,32 @@ export async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_payments_paid_at ON payments(paid_at DESC);
     CREATE INDEX IF NOT EXISTS idx_payments_created_at ON payments(created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
+    CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id);
+    CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expires_at ON password_reset_tokens(expires_at);
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_password_reset_tokens_token_hash ON password_reset_tokens(token_hash);
     CREATE INDEX IF NOT EXISTS idx_cars_status ON cars(status);
     CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_report_presets_by_user_scope ON report_presets(created_by, scope);
     CREATE INDEX IF NOT EXISTS idx_report_jobs_by_user_status ON report_jobs(created_by, status, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_journal_entries_entry_date ON journal_entries(entry_date DESC);
+    CREATE INDEX IF NOT EXISTS idx_journal_entries_reference ON journal_entries(reference_type, reference_id);
+    CREATE INDEX IF NOT EXISTS idx_journal_lines_entry_id ON journal_lines(entry_id);
+    CREATE INDEX IF NOT EXISTS idx_daily_closes_date ON daily_closes(close_date DESC);
+    CREATE INDEX IF NOT EXISTS idx_monthly_closes_period ON monthly_closes(close_year DESC, close_month DESC);
   `);
 
   await pool.query(`
     ALTER TABLE customers
     ADD COLUMN IF NOT EXISTS damiin_name TEXT NOT NULL DEFAULT '';
+  `);
+
+  await pool.query(`
+    ALTER TABLE expenses
+    ADD COLUMN IF NOT EXISTS car_id TEXT REFERENCES cars(id) ON DELETE SET NULL;
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_expenses_car_id ON expenses(car_id);
   `);
 
   await pool.query(
@@ -174,5 +260,15 @@ export async function runMigrations() {
     `INSERT INTO branches (id, name, location)
      VALUES ('BR-001', 'Main Branch', 'Hargeisa')
      ON CONFLICT (id) DO NOTHING`
+  );
+
+  await pool.query(
+    `INSERT INTO accounts (id, code, name, account_type)
+     VALUES
+       ('ACC-CASH', 'CASH', 'Cash on Hand', 'asset'),
+       ('ACC-RIN', 'RENTAL_INCOME', 'Rental Income', 'revenue'),
+       ('ACC-OPEX', 'OPERATING_EXPENSE', 'Operating Expense', 'expense'),
+       ('ACC-COMX', 'COMMISSION_EXPENSE', 'Commission Expense', 'expense')
+     ON CONFLICT (code) DO NOTHING`
   );
 }

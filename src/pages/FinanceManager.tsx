@@ -1,10 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
-import { DollarSign, TrendingUp, TrendingDown, CreditCard, Plus, Trash2, Download, X, Save, Edit } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, CreditCard, Plus, Trash2, Download, X, Save, Edit, CalendarDays, CalendarRange, Search } from 'lucide-react';
 import DashboardLayout from '../layouts/DashboardLayout';
-import StatsCard from '../components/StatsCard';
 import Button from '../components/Button';
 import { api } from '../lib/api';
-import type { Booking, Transaction, TransactionType } from '../types/models';
+import type { Booking, FinanceCloseOverview, ManagedCar, Transaction, TransactionType } from '../types/models';
 import { notifyDataChanged } from '../utils/realtime';
 import { useToast } from '../hooks/useToast';
 import { downloadStyledReportPdf } from '../utils/reportPdfTemplate';
@@ -25,9 +24,12 @@ const normalizeTransactions = (items: Transaction[]): Transaction[] =>
     amount: Number(item.amount || 0),
   }));
 
+const normalizeIsoDate = (value: string | null | undefined): string => String(value || '').slice(0, 10);
+
 const FinanceManager = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [cars, setCars] = useState<ManagedCar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const { showToast } = useToast();
@@ -35,20 +37,37 @@ const FinanceManager = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [closeOverview, setCloseOverview] = useState<FinanceCloseOverview | null>(null);
+  const [closeDate, setCloseDate] = useState(new Date().toISOString().slice(0, 10));
+  const [closeMonth, setCloseMonth] = useState(new Date().getMonth() + 1);
+  const [closeYear, setCloseYear] = useState(new Date().getFullYear());
+  const [isClosingDaily, setIsClosingDaily] = useState(false);
+  const [isClosingMonthly, setIsClosingMonthly] = useState(false);
+  const [isPeriodClosingOpen, setIsPeriodClosingOpen] = useState(false);
+  const [closeTab, setCloseTab] = useState<'daily' | 'monthly'>('daily');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [newDate, setNewDate] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [newType, setNewType] = useState<TransactionType>('Income');
   const [newAmount, setNewAmount] = useState('');
   const [newCategory, setNewCategory] = useState('');
+  const [newCarId, setNewCarId] = useState('');
 
   useEffect(() => {
     const load = async () => {
       try {
         setIsLoading(true);
-        const [trxData, bookingData] = await Promise.all([api.listTransactions(), api.listBookings()]);
+        const [trxData, bookingData, carData, closesData] = await Promise.all([
+          api.listTransactions(),
+          api.listBookings(),
+          api.listCars(),
+          api.getFinanceCloses(),
+        ]);
         setTransactions(normalizeTransactions(trxData));
         setBookings(bookingData);
+        setCars(carData);
+        setCloseOverview(closesData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load finance data.');
       } finally {
@@ -75,10 +94,27 @@ const FinanceManager = () => {
       .reduce((sum, b) => sum + (b.totalAmount || 0), 0);
     return { income, expenses, netProfit: income - expenses, pendingAmount };
   }, [transactions, bookings]);
+  const isNetProfitPositive = financials.netProfit >= 0;
 
-  const totalPages = Math.max(1, Math.ceil(transactions.length / rowsPerPage));
+  const filteredTransactions = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return transactions;
+    return transactions.filter((trx) => {
+      const haystack = [
+        trx.id,
+        trx.description,
+        trx.category,
+        trx.type,
+        trx.bookingId || '',
+        trx.date,
+      ].join(' ').toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [transactions, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / rowsPerPage));
   const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedTransactions = transactions.slice(startIndex, startIndex + rowsPerPage);
+  const paginatedTransactions = filteredTransactions.slice(startIndex, startIndex + rowsPerPage);
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -98,6 +134,10 @@ const FinanceManager = () => {
       setError('Please complete all transaction fields.');
       return;
     }
+    if (newType === 'Expense' && !newCarId) {
+      setError('Please select the car for this expense.');
+      return;
+    }
 
     try {
       if (editingId) {
@@ -107,6 +147,7 @@ const FinanceManager = () => {
           type: newType,
           amount,
           category: newCategory,
+          carId: newType === 'Expense' ? newCarId : undefined,
         });
         setTransactions((prev) =>
           normalizeTransactions(prev.map((t) => (t.id === editingId ? updated : t)))
@@ -120,6 +161,7 @@ const FinanceManager = () => {
           type: newType,
           amount,
           category: newCategory,
+          carId: newType === 'Expense' ? newCarId : undefined,
         });
         setTransactions((prev) => normalizeTransactions([created, ...prev]));
         setCurrentPage(1);
@@ -142,6 +184,7 @@ const FinanceManager = () => {
     setNewType(trx.type);
     setNewAmount(String(trx.amount));
     setNewCategory(trx.category);
+    setNewCarId(trx.carId || '');
     setShowForm(true);
   };
 
@@ -177,6 +220,7 @@ const FinanceManager = () => {
     setNewType('Income');
     setNewAmount('');
     setNewCategory('');
+    setNewCarId('');
   };
 
   const handleDownloadReport = () => {
@@ -209,18 +253,299 @@ const FinanceManager = () => {
     });
   };
 
+  const refreshCloses = async () => {
+    const closes = await api.getFinanceCloses();
+    setCloseOverview(closes);
+  };
+
+  const handleCloseDaily = async () => {
+    if (!closeDate) {
+      setError('Select a date to close.');
+      return;
+    }
+    setError('');
+    setIsClosingDaily(true);
+    try {
+      await api.closeDailyFinance(closeDate);
+      await refreshCloses();
+      showToast(`Daily close saved for ${closeDate}.`, 'success');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to run daily close.';
+      setError(message);
+      showToast(message, 'error');
+    } finally {
+      setIsClosingDaily(false);
+    }
+  };
+
+  const handleCloseMonthly = async () => {
+    setError('');
+    setIsClosingMonthly(true);
+    try {
+      await api.closeMonthlyFinance(closeYear, closeMonth);
+      await refreshCloses();
+      showToast(`Monthly close saved for ${closeYear}-${String(closeMonth).padStart(2, '0')}.`, 'success');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to run monthly close.';
+      setError(message);
+      showToast(message, 'error');
+    } finally {
+      setIsClosingMonthly(false);
+    }
+  };
+
+  const handleDownloadDailyCloseReport = () => {
+    const selectedDate = normalizeIsoDate(closeDate);
+    const closed = closeOverview?.daily.find((item) => normalizeIsoDate(item.closeDate) === selectedDate);
+    if (!closed) {
+      const message = `No daily close found for ${selectedDate}. Close the day first.`;
+      setError(message);
+      showToast(message, 'error');
+      return;
+    }
+
+    const rows = transactions
+      .filter((trx) => normalizeIsoDate(trx.date) === selectedDate)
+      .map((trx) => ([
+        trx.id,
+        formatDateDMY(trx.date),
+        trx.description,
+        trx.type,
+        trx.category,
+        `${trx.type === 'Expense' || trx.type === 'Commission' ? '-' : '+'}$${Number(trx.amount || 0).toFixed(2)}`,
+      ]));
+
+    downloadStyledReportPdf({
+      title: 'Daily Close Report',
+      subtitle: `Closed Date: ${formatDateDMY(selectedDate)}`,
+      summaryLine: `Opening: $${closed.openingBalance.toFixed(2)}   Debits: $${closed.totalDebits.toFixed(2)}   Credits: $${closed.totalCredits.toFixed(2)}   Closing: $${closed.closingBalance.toFixed(2)}`,
+      filters: [
+        { label: 'Period Type', value: 'Daily' },
+        { label: 'Close Date', value: selectedDate },
+        { label: 'Transactions', value: rows.length },
+      ],
+      summaryCards: [
+        { label: 'Opening Balance', value: `$${closed.openingBalance.toFixed(2)}` },
+        { label: 'Debits', value: `$${closed.totalDebits.toFixed(2)}` },
+        { label: 'Credits', value: `$${closed.totalCredits.toFixed(2)}` },
+        { label: 'Closing Balance', value: `$${closed.closingBalance.toFixed(2)}` },
+      ],
+      headers: ['Transaction ID', 'Date', 'Description', 'Type', 'Category', 'Amount'],
+      rows,
+      fileName: `daily-close-${selectedDate}.pdf`,
+      footerText: 'Salaam Car Rental - Daily Close',
+    });
+  };
+
+  const handleDownloadMonthlyCloseReport = () => {
+    const closed = closeOverview?.monthly.find((item) => item.year === closeYear && item.month === closeMonth);
+    if (!closed) {
+      const message = `No monthly close found for ${closeYear}-${String(closeMonth).padStart(2, '0')}. Close the month first.`;
+      setError(message);
+      showToast(message, 'error');
+      return;
+    }
+
+    const monthPrefix = `${closeYear}-${String(closeMonth).padStart(2, '0')}`;
+    const rows = transactions
+      .filter((trx) => trx.date.startsWith(monthPrefix))
+      .map((trx) => ([
+        trx.id,
+        formatDateDMY(trx.date),
+        trx.description,
+        trx.type,
+        trx.category,
+        `${trx.type === 'Expense' || trx.type === 'Commission' ? '-' : '+'}$${Number(trx.amount || 0).toFixed(2)}`,
+      ]));
+
+    downloadStyledReportPdf({
+      title: 'Monthly Close Report',
+      subtitle: `Closed Month: ${monthPrefix}`,
+      summaryLine: `Opening: $${closed.openingBalance.toFixed(2)}   Debits: $${closed.totalDebits.toFixed(2)}   Credits: $${closed.totalCredits.toFixed(2)}   Closing: $${closed.closingBalance.toFixed(2)}`,
+      filters: [
+        { label: 'Period Type', value: 'Monthly' },
+        { label: 'Month', value: monthPrefix },
+        { label: 'Transactions', value: rows.length },
+      ],
+      summaryCards: [
+        { label: 'Opening Balance', value: `$${closed.openingBalance.toFixed(2)}` },
+        { label: 'Debits', value: `$${closed.totalDebits.toFixed(2)}` },
+        { label: 'Credits', value: `$${closed.totalCredits.toFixed(2)}` },
+        { label: 'Closing Balance', value: `$${closed.closingBalance.toFixed(2)}` },
+      ],
+      headers: ['Transaction ID', 'Date', 'Description', 'Type', 'Category', 'Amount'],
+      rows,
+      fileName: `monthly-close-${monthPrefix}.pdf`,
+      footerText: 'Salaam Car Rental - Monthly Close',
+    });
+  };
+
   return (
     <DashboardLayout title="Financial Overview">
       {isLoading && <div className="section-card no-print" style={{ marginBottom: '1rem', padding: '1rem' }}>Loading finance data...</div>}
       {error && <div className="section-card no-print" style={{ marginBottom: '1rem', padding: '1rem', color: '#dc2626' }}>{error}</div>}
-      <div className="finance-actions no-print reveal-up">
-        <Button variant={showForm ? 'danger' : 'primary'} onClick={() => { if (!showForm) resetForm(); setShowForm(!showForm); }}>
-          {showForm ? <><X size={18} /> Cancel</> : <><Plus size={18} /> Add Transaction</>}
-        </Button>
-        <Button onClick={handleDownloadReport} variant="secondary">
-          <Download size={18} /> Download Report
-        </Button>
+      <div className="finance-kpi-grid print-break-avoid reveal-up delay-1">
+        <article className="finance-kpi-card">
+          <div className="finance-kpi-icon income"><TrendingUp size={24} /></div>
+          <div className="finance-kpi-copy">
+            <p>Total Income</p>
+            <h3>${financials.income.toLocaleString()}</h3>
+            <span className="finance-kpi-pill positive">+8% from last month</span>
+          </div>
+        </article>
+        <article className="finance-kpi-card">
+          <div className="finance-kpi-icon expense"><TrendingDown size={24} /></div>
+          <div className="finance-kpi-copy">
+            <p>Total Expenses</p>
+            <h3>${financials.expenses.toLocaleString()}</h3>
+            <span className="finance-kpi-pill negative">+3% from last month</span>
+          </div>
+        </article>
+        <article className="finance-kpi-card">
+          <div className={`finance-kpi-icon ${isNetProfitPositive ? 'net-positive' : 'net-negative'}`}><DollarSign size={24} /></div>
+          <div className="finance-kpi-copy">
+            <p>Net Profit</p>
+            <h3 className={`finance-kpi-value ${isNetProfitPositive ? 'positive' : 'negative'}`}>${financials.netProfit.toLocaleString()}</h3>
+            <span className={`finance-kpi-pill ${isNetProfitPositive ? 'positive' : 'negative'}`}>
+              {isNetProfitPositive ? 'Profit is positive' : 'Profit is negative'}
+            </span>
+          </div>
+        </article>
+        <article className="finance-kpi-card">
+          <div className="finance-kpi-icon pending"><CreditCard size={24} /></div>
+          <div className="finance-kpi-copy">
+            <p>Pending Payments</p>
+            <h3>${financials.pendingAmount.toLocaleString()}</h3>
+            <span className="finance-kpi-sub">Awaiting settlement</span>
+          </div>
+        </article>
       </div>
+
+      <div className="finance-actions-shell no-print reveal-up">
+        <div className="finance-actions">
+          <Button variant={showForm ? 'danger' : 'primary'} onClick={() => { if (!showForm) resetForm(); setShowForm(!showForm); }}>
+            {showForm ? <><X size={18} /> Cancel</> : <><Plus size={18} /> Add Transaction</>}
+          </Button>
+          <Button onClick={handleDownloadReport} variant="secondary">
+            <Download size={18} /> Download Report
+          </Button>
+        </div>
+        <button
+          type="button"
+          className="finance-close-toggle"
+          aria-expanded={isPeriodClosingOpen}
+          aria-controls="finance-close-panel"
+          onClick={() => setIsPeriodClosingOpen((prev) => !prev)}
+        >
+          {isPeriodClosingOpen ? 'Hide Period Closing' : 'Period Closing'}
+        </button>
+      </div>
+
+      {isPeriodClosingOpen && (
+        <div id="finance-close-panel" className="finance-close-panel no-print reveal-up delay-1">
+          <div className="finance-close-head">
+            <h3>Period Closing</h3>
+            <span>Lock and report closed periods</span>
+          </div>
+          <div className="finance-close-tabs" role="tablist" aria-label="Period closing tabs">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={closeTab === 'daily'}
+              className={`finance-close-tab ${closeTab === 'daily' ? 'active' : ''}`}
+              onClick={() => setCloseTab('daily')}
+            >
+              <CalendarDays size={16} />
+              Daily Close
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={closeTab === 'monthly'}
+              className={`finance-close-tab ${closeTab === 'monthly' ? 'active' : ''}`}
+              onClick={() => setCloseTab('monthly')}
+            >
+              <CalendarRange size={16} />
+              Monthly Close
+            </button>
+          </div>
+
+          {closeTab === 'daily' ? (
+            <div className="finance-close-card finance-close-card-daily">
+              <label htmlFor="close-date">Date</label>
+              <input
+                id="close-date"
+                type="date"
+                className="form-input"
+                value={closeDate}
+                onChange={(e) => setCloseDate(e.target.value)}
+              />
+              <div className="finance-close-actions">
+                <Button type="button" onClick={handleCloseDaily} disabled={isClosingDaily}>
+                  {isClosingDaily ? 'Closing...' : 'Close Day'}
+                </Button>
+                <Button type="button" variant="secondary" onClick={handleDownloadDailyCloseReport}>
+                  Download Daily Report
+                </Button>
+              </div>
+              {closeOverview?.latestDaily ? (
+                <p className="finance-close-meta">
+                  Latest: {formatDateDMY(closeOverview.latestDaily.closeDate)} | Closing Balance: $
+                  {closeOverview.latestDaily.closingBalance.toFixed(2)}
+                </p>
+              ) : (
+                <p className="finance-close-meta">No daily close yet.</p>
+              )}
+            </div>
+          ) : (
+            <div className="finance-close-card finance-close-card-monthly">
+              <div className="finance-close-period">
+                <div>
+                  <label htmlFor="close-month">Month</label>
+                  <select
+                    id="close-month"
+                    className="form-input"
+                    value={closeMonth}
+                    onChange={(e) => setCloseMonth(Number(e.target.value))}
+                  >
+                    {Array.from({ length: 12 }, (_, index) => index + 1).map((month) => (
+                      <option key={month} value={month}>
+                        {String(month).padStart(2, '0')}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="close-year">Year</label>
+                  <input
+                    id="close-year"
+                    type="number"
+                    className="form-input"
+                    value={closeYear}
+                    onChange={(e) => setCloseYear(Number(e.target.value))}
+                  />
+                </div>
+              </div>
+              <div className="finance-close-actions">
+                <Button type="button" onClick={handleCloseMonthly} disabled={isClosingMonthly}>
+                  {isClosingMonthly ? 'Closing...' : 'Close Month'}
+                </Button>
+                <Button type="button" variant="secondary" onClick={handleDownloadMonthlyCloseReport}>
+                  Download Monthly Report
+                </Button>
+              </div>
+              {closeOverview?.latestMonthly ? (
+                <p className="finance-close-meta">
+                  Latest: {closeOverview.latestMonthly.year}-{String(closeOverview.latestMonthly.month).padStart(2, '0')} |
+                  Closing Balance: ${closeOverview.latestMonthly.closingBalance.toFixed(2)}
+                </p>
+              ) : (
+                <p className="finance-close-meta">No monthly close yet.</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {showForm && (
         <div className="transaction-form-card no-print reveal-up delay-1">
@@ -251,6 +576,19 @@ const FinanceManager = () => {
                 <label>Category</label>
                 <input type="text" required className="form-input" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} />
               </div>
+              {newType === 'Expense' && (
+                <div className="form-group">
+                  <label>Car</label>
+                  <select className="form-input" required value={newCarId} onChange={(e) => setNewCarId(e.target.value)}>
+                    <option value="">Select car</option>
+                    {cars.map((car) => (
+                      <option key={car.id} value={car.id}>
+                        {car.name} ({car.licensePlate})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
             <div className="form-footer">
               <Button type="submit"><Save size={18} /> {editingId ? 'Update Transaction' : 'Save Transaction'}</Button>
@@ -259,35 +597,43 @@ const FinanceManager = () => {
         </div>
       )}
 
-      <div className="stats-grid print-break-avoid reveal-up delay-1">
-        <StatsCard title="Total Income" value={`$${financials.income.toLocaleString()}`} icon={<TrendingUp size={24} />} color="#ad1a24" trend={{ value: 8, isPositive: true }} />
-        <StatsCard title="Total Expenses" value={`$${financials.expenses.toLocaleString()}`} icon={<TrendingDown size={24} />} color="#ef4444" trend={{ value: 3, isPositive: false }} />
-        <StatsCard title="Net Profit" value={`$${financials.netProfit.toLocaleString()}`} icon={<DollarSign size={24} />} color="#3b82f6" trend={{ value: 12, isPositive: true }} />
-        <StatsCard title="Pending Payments" value={`$${financials.pendingAmount.toLocaleString()}`} icon={<CreditCard size={24} />} color="#f59e0b" />
-      </div>
-
       <div className="section-card print-break-avoid reveal-up delay-2">
-        <div className="card-header">
+        <div className="card-header finance-card-header">
           <h3>Transaction History</h3>
-          <div className="finance-pagination-meta no-print">
-            <label htmlFor="finance-rows-per-page">Rows</label>
-            <select
-              id="finance-rows-per-page"
-              value={rowsPerPage}
-              onChange={(e) => {
-                setRowsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-            >
-              <option value={5}>5</option>
-              <option value={8}>8</option>
-              <option value={10}>10</option>
-              <option value={15}>15</option>
-            </select>
+          <div className="finance-table-controls no-print">
+            <div className="finance-search">
+              <Search size={15} />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                placeholder="Search ID, description, category..."
+                aria-label="Search transactions"
+              />
+            </div>
+            <div className="finance-pagination-meta">
+              <label htmlFor="finance-rows-per-page">Rows</label>
+              <select
+                id="finance-rows-per-page"
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+              >
+                <option value={5}>5</option>
+                <option value={8}>8</option>
+                <option value={10}>10</option>
+                <option value={15}>15</option>
+              </select>
+            </div>
           </div>
         </div>
         <div className="table-responsive">
-          <table className="data-table">
+          <table className="data-table finance-transactions-table">
             <thead>
               <tr>
                 <th>ID</th>
@@ -300,9 +646,22 @@ const FinanceManager = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedTransactions.length === 0 ? (
+              {isLoading ? (
+                Array.from({ length: rowsPerPage }, (_, idx) => (
+                  <tr key={`finance-skeleton-${idx}`} className="finance-skeleton-row">
+                    <td colSpan={7}>
+                      <span className="finance-skeleton-line" />
+                    </td>
+                  </tr>
+                ))
+              ) : paginatedTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-muted">No transactions to show for the selected page.</td>
+                  <td colSpan={7}>
+                    <div className="finance-empty-state">
+                      <strong>No transactions found</strong>
+                      <span>Try another search term or clear your filters.</span>
+                    </div>
+                  </td>
                 </tr>
               ) : (
                 paginatedTransactions.map((trx) => (
@@ -315,16 +674,17 @@ const FinanceManager = () => {
                     </td>
                     <td><span className="badge">{trx.category}</span></td>
                     <td>
-                      <span className={`badge ${trx.type === 'Expense' ? 'badge-danger' : trx.type === 'Commission' ? 'badge-commission' : 'badge-success'}`}>
+                      <span className={`finance-type-pill ${trx.type === 'Expense' ? 'expense' : trx.type === 'Commission' ? 'commission' : 'income'}`}>
                         {trx.type}
                       </span>
                     </td>
-                    <td className={`font-bold ${['Expense', 'Commission'].includes(trx.type) ? 'text-red' : 'text-green'}`}>
+                    <td className={`font-bold finance-amount ${['Expense', 'Commission'].includes(trx.type) ? 'negative' : 'positive'}`}>
                       {['Expense', 'Commission'].includes(trx.type) ? '-' : '+'}${trx.amount}
                     </td>
                     <td className="no-print">
+                      <div className="table-actions finance-table-actions">
                       <button
-                        className="action-btn primary"
+                        className="action-btn finance-ghost-action"
                         onClick={() => handleEdit(trx)}
                         title="Edit Transaction"
                         aria-label={`Edit transaction ${trx.id}`}
@@ -332,13 +692,14 @@ const FinanceManager = () => {
                         <Edit size={16} />
                       </button>
                       <button
-                        className="action-btn danger"
+                        className="action-btn finance-ghost-action danger"
                         onClick={() => handleDelete(trx)}
                         title={trx.bookingId ? 'Delete Booking + Transaction' : 'Delete Transaction'}
                         aria-label={`Delete transaction ${trx.id}`}
                       >
                         <Trash2 size={16} />
                       </button>
+                      </div>
                     </td>
                   </tr>
                 ))

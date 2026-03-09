@@ -3,6 +3,7 @@ import { pool } from '../db/pool.js';
 import { logAudit } from '../services/auditService.js';
 import { makeId } from '../services/security.js';
 import { calculateBookingAmounts, toDateTime } from '../services/bookingMath.js';
+import { assertAccountingPeriodOpen, getPaymentAccountingDate, removeJournalForReference } from '../services/accountingService.js';
 import { hasBookingOverlap, mapBooking, parsePagination, syncBookingIncomePayment } from './common.js';
 
 const bookingCreateSchema = z.object({
@@ -125,7 +126,8 @@ export async function createBooking(req, res, next) {
           status: 'reserved',
         },
         customerResult.rows[0].full_name,
-        carResult.rows[0].name
+        carResult.rows[0].name,
+        req.auth.userId
       );
 
       await logAudit({
@@ -248,7 +250,8 @@ export async function updateBooking(req, res, next) {
           status: payload.status,
         },
         customerResult.rows[0].full_name,
-        carResult.rows[0].name
+        carResult.rows[0].name,
+        req.auth.userId
       );
 
       await logAudit({ userId: req.auth.userId, action: 'update', entity: 'booking', entityId: id });
@@ -268,9 +271,18 @@ export async function updateBooking(req, res, next) {
 export async function deleteBooking(req, res, next) {
   try {
     const id = req.params.id;
+    const paymentRows = await pool.query('SELECT id FROM payments WHERE booking_id = $1', [id]);
+    for (const payment of paymentRows.rows) {
+      const paymentDate = await getPaymentAccountingDate(payment.id);
+      if (paymentDate) await assertAccountingPeriodOpen(paymentDate);
+    }
+
     await pool.query('BEGIN');
     try {
       await pool.query('DELETE FROM payments WHERE booking_id = $1', [id]);
+      for (const payment of paymentRows.rows) {
+        await removeJournalForReference('payment', payment.id);
+      }
       const deleted = await pool.query('DELETE FROM bookings WHERE id = $1', [id]);
       if (deleted.rowCount === 0) {
         await pool.query('ROLLBACK');

@@ -1245,9 +1245,9 @@ export async function dashboard(_req, res, next) {
     const totalRevenue = Number(revenue.rows[0].total || 0);
 
     const statusColor = {
-      Available: '#ad1a24',
-      Rented: '#f59e0b',
-      Maintenance: '#ef4444',
+      Available: '#22c55e',
+      Rented: '#ef4444',
+      Maintenance: '#f59e0b',
     };
 
     const fleetStatusData = statuses.rows.map((r) => ({

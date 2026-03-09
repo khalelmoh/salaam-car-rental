@@ -4,35 +4,56 @@
     background: transparent;
 }
 
+.dashboard-layout.dashboard-layout-overview-dark {
+    background:
+        radial-gradient(circle at 35% -30%, rgba(53, 120, 206, 0.18), transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(22, 65, 134, 0.28), transparent 42%),
+        linear-gradient(160deg, #070f1f 0%, #0b1730 40%, #071226 100%);
+}
+
 .dashboard-main {
     flex: 1;
-    margin-left: 260px;
+    margin-left: 272px;
     display: flex;
     flex-direction: column;
 }
 
 .dashboard-header {
-    min-height: 70px;
+    min-height: 76px;
     background:
-        radial-gradient(circle at 7% 20%, rgba(14, 165, 233, 0.11), transparent 34%),
-        radial-gradient(circle at 95% 70%, rgba(245, 158, 11, 0.14), transparent 35%),
-        rgba(255, 255, 255, 0.9);
+        radial-gradient(circle at 7% 20%, rgba(191, 163, 122, 0.22), transparent 34%),
+        radial-gradient(circle at 95% 70%, rgba(62, 47, 38, 0.08), transparent 35%),
+        rgba(255, 253, 248, 0.94);
     backdrop-filter: blur(6px);
-    border-bottom: 1px solid #d7e4f2;
+    border-bottom: 1px solid #e1d7c9;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.8rem 1.5rem;
+    padding: 0.8rem 1.2rem 0.8rem 1rem;
     position: sticky;
     top: 0;
     z-index: 100;
 }
 
+.dashboard-header.dashboard-header-overview-dark {
+    background:
+        radial-gradient(circle at 20% 0%, rgba(53, 120, 206, 0.18), transparent 45%),
+        linear-gradient(160deg, rgba(12, 24, 47, 0.94) 0%, rgba(9, 20, 39, 0.96) 100%);
+    border-bottom: 1px solid rgba(109, 152, 219, 0.3);
+}
+
 .dashboard-header h1 {
     font-size: 1.38rem;
-    color: #10263f;
+    color: #2c211b;
     font-weight: 800;
     letter-spacing: -0.03em;
+}
+
+.dashboard-header.dashboard-header-overview-dark h1 {
+    color: #f1f6ff;
+    font-size: 2.65rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
 }
 
 .user-profile {
@@ -56,9 +77,9 @@
     width: 36px;
     height: 36px;
     border-radius: 999px;
-    border: 1px solid #c9daec;
-    background: linear-gradient(180deg, #ffffff 0%, #f2f8ff 100%);
-    color: #274666;
+    border: 1px solid #d9ccb8;
+    background: linear-gradient(180deg, #fffefb 0%, #f6f0e4 100%);
+    color: #4b392f;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -66,9 +87,15 @@
     transition: all 0.2s ease;
 }
 
+.dashboard-header.dashboard-header-overview-dark .notification-btn {
+    border: 1px solid rgba(114, 157, 220, 0.35);
+    background: linear-gradient(180deg, rgba(37, 56, 92, 0.9) 0%, rgba(26, 42, 70, 0.9) 100%);
+    color: #d5e3f8;
+}
+
 .notification-btn:hover {
-    background: linear-gradient(180deg, #f5faff 0%, #e8f3ff 100%);
-    border-color: #aac6e3;
+    background: linear-gradient(180deg, #f9f2e6 0%, #f1e6d4 100%);
+    border-color: #ccb89c;
 }
 
 .notification-count {
@@ -93,32 +120,48 @@
     right: 0;
     width: 340px;
     max-height: 420px;
-    background: linear-gradient(180deg, #ffffff 0%, #f9fcff 100%);
-    border: 1px solid #d2e2f4;
+    background: linear-gradient(180deg, #fffefb 0%, #f8f2e8 100%);
+    border: 1px solid #e1d4c1;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     overflow: hidden;
     z-index: 120;
 }
 
+.dashboard-header.dashboard-header-overview-dark .notifications-panel {
+    background: linear-gradient(180deg, rgba(17, 31, 57, 0.98) 0%, rgba(10, 22, 42, 0.98) 100%);
+    border: 1px solid rgba(110, 152, 214, 0.36);
+}
+
 .notifications-panel-header {
     padding: 0.75rem 0.9rem;
-    border-bottom: 1px solid #dce8f5;
-    color: #132943;
+    border-bottom: 1px solid #e8ddce;
+    color: #352922;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
 }
 
+.dashboard-header.dashboard-header-overview-dark .notifications-panel-header {
+    border-bottom: 1px solid rgba(110, 152, 214, 0.28);
+    color: #d7e5f9;
+}
+
 .notifications-clear-btn {
-    border: 1px solid #c9dced;
-    background: linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%);
+    border: 1px solid #d6cab7;
+    background: linear-gradient(180deg, #fffefb 0%, #f7f0e4 100%);
     border-radius: 8px;
-    color: #334155;
+    color: #5b4738;
     font-size: 0.75rem;
     padding: 0.3rem 0.55rem;
     cursor: pointer;
+}
+
+.dashboard-header.dashboard-header-overview-dark .notifications-clear-btn {
+    border: 1px solid rgba(110, 152, 214, 0.32);
+    background: rgba(35, 56, 91, 0.65);
+    color: #d4e4fa;
 }
 
 .notifications-clear-btn:disabled {
@@ -139,7 +182,11 @@
 
 .notifications-item {
     padding: 0.75rem 0.9rem;
-    border-bottom: 1px solid #e5edf7;
+    border-bottom: 1px solid #ece4d8;
+}
+
+.dashboard-header.dashboard-header-overview-dark .notifications-item {
+    border-bottom: 1px solid rgba(110, 152, 214, 0.2);
 }
 
 .notifications-item:last-child {
@@ -148,19 +195,31 @@
 
 .notifications-message {
     font-size: 0.88rem;
-    color: #0f172a;
+    color: #2a201a;
     margin-bottom: 0.25rem;
+}
+
+.dashboard-header.dashboard-header-overview-dark .notifications-message {
+    color: #dce9fb;
 }
 
 .notifications-time {
     font-size: 0.76rem;
-    color: #64748b;
+    color: #8a7a68;
+}
+
+.dashboard-header.dashboard-header-overview-dark .notifications-time {
+    color: #8ea9cc;
 }
 
 .notifications-empty {
     padding: 1rem 0.9rem;
     font-size: 0.86rem;
-    color: #64748b;
+    color: #8a7a68;
+}
+
+.dashboard-header.dashboard-header-overview-dark .notifications-empty {
+    color: #9bb3d3;
 }
 
 .notifications-error {
@@ -168,9 +227,14 @@
 }
 
 .notifications-panel-footer {
-    border-top: 1px solid #dce8f5;
+    border-top: 1px solid #e8ddce;
     padding: 0.6rem 0.9rem;
-    background: linear-gradient(110deg, #f4f9ff 0%, #fdeef0 55%, #fff6ea 100%);
+    background: linear-gradient(110deg, #f8f2e8 0%, #f9f1e6 55%, #f5e8d6 100%);
+}
+
+.dashboard-header.dashboard-header-overview-dark .notifications-panel-footer {
+    border-top: 1px solid rgba(110, 152, 214, 0.28);
+    background: rgba(28, 46, 76, 0.7);
 }
 
 .notifications-view-all {
@@ -180,6 +244,10 @@
     text-decoration: none;
 }
 
+.dashboard-header.dashboard-header-overview-dark .notifications-view-all {
+    color: #9fd0ff;
+}
+
 .notifications-view-all:hover {
     text-decoration: underline;
 }
@@ -187,7 +255,7 @@
 .avatar {
     width: 36px;
     height: 36px;
-    background: linear-gradient(140deg, #ad1a24 0%, #0ea5e9 100%);
+    background: linear-gradient(140deg, #3e2f26 0%, #bfa37a 100%);
     color: #f8fffc;
     border-radius: 50%;
     display: flex;
@@ -197,17 +265,29 @@
     font-size: 1rem;
 }
 
+.dashboard-header.dashboard-header-overview-dark .avatar {
+    background: linear-gradient(140deg, #ad1a24 0%, #58bfff 100%);
+}
+
 .username {
     font-weight: 600;
     font-size: 0.85rem;
     color: var(--text-main);
 }
 
+.dashboard-header.dashboard-header-overview-dark .username {
+    color: #dce9f8;
+}
+
 .dashboard-content {
-    padding: 1.5rem;
+    padding: 1rem;
     flex: 1;
     overflow-y: auto;
     animation: contentFade 0.25s ease;
+}
+
+.dashboard-layout-overview-dark .dashboard-content {
+    padding: 1.2rem;
 }
 
 .mobile-action-nav {
@@ -253,8 +333,8 @@
         right: 0;
         bottom: 0;
         height: 72px;
-        background: linear-gradient(180deg, #ffffff 0%, #f6fbff 100%);
-        border-top: 1px solid #d8e5f3;
+        background: linear-gradient(180deg, #fffefb 0%, #f7f0e4 100%);
+        border-top: 1px solid #e1d7c8;
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         z-index: 1200;
@@ -268,14 +348,14 @@
         justify-content: center;
         gap: 0.2rem;
         text-decoration: none;
-        color: #64748b;
+        color: #8b7a69;
         font-size: 0.7rem;
         font-weight: 600;
     }
 
 .mobile-action-item.active {
-        color: #0f6ea3;
-        background: linear-gradient(180deg, #e8f8ff 0%, #e8fbf3 100%);
+        color: #3e2f26;
+        background: linear-gradient(180deg, #f6ede0 0%, #efe2cd 100%);
     }
 }
 

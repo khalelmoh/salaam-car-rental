@@ -840,6 +840,50 @@ const server = http.createServer(async (req, res) => {
         );
       }
 
+      const matchesPeriod = (date) => {
+        if (period === 'range') return inDateRange(date, from, to);
+        if (period === 'monthly') {
+          const d = new Date(`${date}T00:00:00`);
+          if (Number.isNaN(d.getTime()) || !year || !month) return false;
+          return d.getFullYear() === year && d.getMonth() + 1 === month;
+        }
+        if (period === 'yearly') {
+          const d = new Date(`${date}T00:00:00`);
+          if (Number.isNaN(d.getTime()) || !year) return false;
+          return d.getFullYear() === year;
+        }
+        return true;
+      };
+
+      const legacyCarValues = [String(car.id || ''), String(car.name || ''), String(car.licensePlate || '')]
+        .map((v) => v.trim().toLowerCase())
+        .filter(Boolean);
+      const isLegacyExpenseMatch = (transaction) => {
+        if (String(transaction.type || '') !== 'Expense' || transaction.carId) return false;
+        const category = String(transaction.category || '').trim().toLowerCase();
+        const description = String(transaction.description || '').toLowerCase();
+        return legacyCarValues.includes(category) || legacyCarValues.some((value) => description.includes(value));
+      };
+
+      const totalExpenseTransactions = db.transactions
+        .filter((transaction) => String(transaction.type || '') === 'Expense')
+        .filter((transaction) => matchesPeriod(transaction.date))
+        .filter((transaction) => String(transaction.carId || '') === carId || isLegacyExpenseMatch(transaction))
+        .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
+
+      const totalCommissionTransactions = db.transactions
+        .filter((transaction) => String(transaction.type || '') === 'Commission')
+        .filter((transaction) => matchesPeriod(transaction.date))
+        .filter((transaction) => {
+          if (String(transaction.carId || '') === carId) return true;
+          if (!transaction.bookingId) return false;
+          const linked = db.bookings.find((booking) => booking.id === transaction.bookingId);
+          return linked?.carId === carId;
+        })
+        .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
+
+      const totalExpenses = totalExpenseTransactions + totalCommissionTransactions;
+
       const rows = filtered
         .slice()
         .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
@@ -887,6 +931,7 @@ const server = http.createServer(async (req, res) => {
           totalDaysRented,
           totalRevenue: Number(totalRevenue.toFixed(2)),
           averageRevenuePerRental: rows.length ? Number((totalRevenue / rows.length).toFixed(2)) : 0,
+          totalExpenses: Number(totalExpenses.toFixed(2)),
         },
         pagination: {
           page: allRows ? 1 : page,
@@ -1244,6 +1289,18 @@ const server = http.createServer(async (req, res) => {
         json(res, 400, { error: 'amount must be a number greater than zero.' });
         return;
       }
+      const type = String(body.type);
+      if (type === 'Expense') {
+        if (!body.carId) {
+          json(res, 400, { error: 'Field "carId" is required for Expense transactions.' });
+          return;
+        }
+        const carExists = db.cars.some((car) => car.id === body.carId);
+        if (!carExists) {
+          json(res, 400, { error: 'Selected vehicle does not exist.' });
+          return;
+        }
+      }
       const transaction = {
         id: makeId('TRX'),
         date: body.date,
@@ -1251,6 +1308,7 @@ const server = http.createServer(async (req, res) => {
         type: body.type,
         amount,
         category: body.category,
+        carId: body.type === 'Expense' ? body.carId : body.carId || '',
         createdAt: new Date().toISOString(),
       };
       db.transactions.unshift(transaction);
@@ -1281,6 +1339,17 @@ const server = http.createServer(async (req, res) => {
       if (Number.isNaN(merged.amount) || merged.amount <= 0) {
         json(res, 400, { error: 'amount must be a number greater than zero.' });
         return;
+      }
+      if (merged.type === 'Expense') {
+        if (!merged.carId) {
+          json(res, 400, { error: 'Field "carId" is required for Expense transactions.' });
+          return;
+        }
+        const carExists = db.cars.some((car) => car.id === merged.carId);
+        if (!carExists) {
+          json(res, 400, { error: 'Selected vehicle does not exist.' });
+          return;
+        }
       }
       db.transactions[idx] = merged;
       await writeDb(db);

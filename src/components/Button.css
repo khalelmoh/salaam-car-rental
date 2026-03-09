@@ -43,9 +43,9 @@
 
 /* Variants */
 .btn-primary {
-    background: linear-gradient(140deg, var(--primary) 0%, #8f131c 100%);
+    background: linear-gradient(140deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: #ffffff;
-    border-color: rgba(173, 26, 36, 0.35);
+    border-color: rgba(62, 47, 38, 0.4);
 }
 
 .btn-primary:hover {
@@ -55,13 +55,13 @@
 
 .btn-secondary {
     background-color: var(--accent);
-    color: #2e2110;
-    border-color: rgba(186, 109, 36, 0.4);
+    color: #2f241e;
+    border-color: rgba(154, 128, 89, 0.42);
 }
 
 .btn-secondary:hover {
-    background-color: #cf6f1f;
-    color: #fff;
+    background-color: #ab8f67;
+    color: #fffdf8;
 }
 
 .btn-outline {

@@ -1,4 +1,4 @@
-import { randomUUID, scryptSync, timingSafeEqual } from 'node:crypto';
+import { createHash, randomUUID, scryptSync, timingSafeEqual } from 'node:crypto';
 import bcrypt from 'bcrypt';
 
 export const SESSION_TTL_HOURS = Number(process.env.SESSION_TTL_HOURS || 12);
@@ -9,6 +9,10 @@ export function makeId(prefix) {
 
 export function makeToken() {
   return randomUUID();
+}
+
+export function hashResetToken(token) {
+  return createHash('sha256').update(String(token)).digest('hex');
 }
 
 export function sanitizeUser(row) {

@@ -1,5 +1,6 @@
 import { pool } from '../db/pool.js';
 import { makeId } from '../services/security.js';
+import { removeJournalForReference, syncPaymentJournal } from '../services/accountingService.js';
 
 function toHHMM(value, fallback) {
   const raw = String(value ?? '').trim();
@@ -76,11 +77,13 @@ export async function hasBookingOverlap({ carId, startDate, startTime, endDate, 
   return rows.length > 0;
 }
 
-export async function syncBookingIncomePayment(client, booking, customerName, carName) {
+export async function syncBookingIncomePayment(client, booking, customerName, carName, userId = null) {
   const { rows } = await client.query('SELECT id FROM payments WHERE booking_id = $1 LIMIT 1', [booking.id]);
+
   if (booking.status === 'cancelled') {
     if (rows[0]) {
       await client.query('DELETE FROM payments WHERE id = $1', [rows[0].id]);
+      await removeJournalForReference('payment', rows[0].id);
     }
     return;
   }
@@ -108,4 +111,6 @@ export async function syncBookingIncomePayment(client, booking, customerName, ca
       [payload.id, payload.bookingId, payload.amount, payload.method, payload.note, payload.paidAt]
     );
   }
+
+  await syncPaymentJournal(payload.id, userId);
 }

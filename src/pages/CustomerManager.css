@@ -41,15 +41,15 @@
 
 .customer-table-summary span {
     font-size: 0.85rem;
-    color: #10263f;
-    border: 1px solid #c8daee;
+    color: #3e2f26;
+    border: 1px solid #decfb8;
     border-radius: 999px;
-    background: linear-gradient(180deg, #f9fcff 0%, #f0f8ff 100%);
+    background: linear-gradient(180deg, #f9f2e8 0%, #f4eadb 100%);
     padding: 0.3rem 0.7rem;
 }
 
 .customer-table-container {
-    border: 1px solid #d4e3f3;
+    border: 1px solid #e1d6c6;
 }
 
 .customer-pagination-meta {
@@ -65,37 +65,37 @@
 }
 
 .customer-pagination-meta select {
-    border: 1px solid #cbdcf0;
+    border: 1px solid #dbcdb9;
     border-radius: 8px;
     padding: 0.35rem 0.55rem;
-    background: #fff;
+    background: #fffefb;
     font-size: 0.85rem;
 }
 
 .customer-table-container .data-table th {
-    background: linear-gradient(180deg, #f5f9ff 0%, #edf7f2 100%);
-    color: #34506e;
-    border: 1px solid #d5e4f4;
+    background: linear-gradient(180deg, #f9f2e8 0%, #f3ebde 100%);
+    color: #6a5747;
+    border: 1px solid #e3d8c8;
     position: sticky;
     top: 0;
     z-index: 1;
 }
 
 .customer-table-container .data-table td {
-    border: 1px solid #e4ecf6;
+    border: 1px solid #ece4d8;
 }
 
 .customer-table-container .data-table tbody tr:nth-child(even) td {
-    background: #fbfdff;
+    background: #fdf9f3;
 }
 
 .customer-table-container .data-table tbody tr:hover td {
-    background: linear-gradient(90deg, #f2f9ff 0%, #f3fbf7 100%);
+    background: linear-gradient(90deg, #f9f3e9 0%, #f3eadb 100%);
 }
 
 .customer-index {
     font-weight: 600;
-    color: #475569;
+    color: #5f5145;
 }
 
 .customer-name-cell {
@@ -113,9 +113,9 @@
     justify-content: center;
     font-size: 0.75rem;
     font-weight: 700;
-    color: #0c7a84;
-    background: linear-gradient(140deg, #d8fff3 0%, #d8f3ff 100%);
-    border: 1px solid #a7e8e8;
+    color: #6b5847;
+    background: linear-gradient(140deg, #f3eadb 0%, #eee0ca 100%);
+    border: 1px solid #dac9b0;
 }
 
 .contact-info a {
@@ -132,15 +132,15 @@
     align-items: center;
     gap: 0.4rem;
     font-size: 0.8rem;
-    border: 1px solid #c8daee;
+    border: 1px solid #decfb8;
     border-radius: 999px;
-    background: linear-gradient(180deg, #f9fcff 0%, #f1f8ff 100%);
-    color: #10263f;
+    background: linear-gradient(180deg, #f9f2e8 0%, #f3e9da 100%);
+    color: #3e2f26;
     padding: 0.25rem 0.6rem;
 }
 
 .doc-pill.muted {
-    color: #475569;
+    color: #6f6052;
 }
 
 .address-cell {
@@ -152,7 +152,7 @@
 
 .customer-empty-state {
     text-align: center;
-    color: #64748b;
+    color: #6f6052;
     font-size: 0.92rem;
     padding: 1.25rem !important;
 }
@@ -178,17 +178,17 @@
 }
 
 .customer-page-jump-select {
-    border: 1px solid #cbdcf0;
+    border: 1px solid #dbcdb9;
     border-radius: 8px;
     padding: 0.35rem 0.55rem;
-    background: #fff;
+    background: #fffefb;
     font-size: 0.85rem;
     min-width: 64px;
 }
 
 .customer-report-card {
     margin-bottom: 1rem;
-    border: 1px solid #d4e3f3;
+    border: 1px solid #e1d6c6;
 }
 
 .customer-report-header {
@@ -202,7 +202,7 @@
 
 .customer-report-header h3 {
     font-size: 1rem;
-    color: #0f172a;
+    color: #2a201a;
 }
 
 .customer-report-actions {
@@ -212,11 +212,11 @@
 }
 
 .customer-report-select {
-    border: 1px solid #c8daee;
+    border: 1px solid #decfb8;
     border-radius: 8px;
     padding: 0.5rem 0.7rem;
     min-width: 260px;
-    background: #fff;
+    background: #fffefb;
 }
 
 .customer-report-meta {
@@ -227,11 +227,11 @@
 }
 
 .customer-report-meta span {
-    border: 1px solid #c8daee;
+    border: 1px solid #decfb8;
     border-radius: 999px;
-    background: linear-gradient(180deg, #f9fcff 0%, #f1f8ff 100%);
+    background: linear-gradient(180deg, #f9f2e8 0%, #f3e9da 100%);
     padding: 0.25rem 0.65rem;
-    color: #365474;
+    color: #5f5145;
     font-size: 0.82rem;
 }
 
@@ -243,26 +243,26 @@
 }
 
 .report-stat {
-    border: 1px solid #d4e3f3;
+    border: 1px solid #e1d6c6;
     border-radius: 10px;
-    background: linear-gradient(160deg, #f9fcff 0%, #f2faff 100%);
+    background: linear-gradient(160deg, #fffefb 0%, #f7f0e4 100%);
     padding: 0.55rem 0.65rem;
     display: grid;
     gap: 0.15rem;
 }
 
 .report-stat small {
-    color: #64748b;
+    color: #6f6052;
     font-size: 0.75rem;
 }
 
 .report-stat strong {
-    color: #0f172a;
+    color: #2a201a;
     font-size: 1rem;
 }
 
 .customer-report-table {
-    border: 1px solid #d4e3f3;
+    border: 1px solid #e1d6c6;
 }
 
 .text-capitalize {

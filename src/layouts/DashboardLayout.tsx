@@ -13,9 +13,10 @@ import './DashboardLayout.css';
 interface DashboardLayoutProps {
     children: ReactNode;
     title: string;
+    theme?: 'default' | 'overview-dark';
 }
 
-const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, title, theme = 'default' }: DashboardLayoutProps) => {
     const user = useMemo(() => getStoredUser(), []);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isNotificationsLoading, setIsNotificationsLoading] = useState(false);
@@ -80,10 +81,10 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
     const unreadCount = notifications.filter((n) => n.timestamp > lastReadAt).length;
 
     return (
-        <div className="dashboard-layout">
+        <div className={`dashboard-layout ${theme === 'overview-dark' ? 'dashboard-layout-overview-dark' : ''}`}>
             <Sidebar />
             <main className="dashboard-main">
-                <header className="dashboard-header">
+                <header className={`dashboard-header ${theme === 'overview-dark' ? 'dashboard-header-overview-dark' : ''}`}>
                     <h1>{title}</h1>
                     <div className="header-actions">
                         <div className="notifications-wrap" ref={notificationsRef}>

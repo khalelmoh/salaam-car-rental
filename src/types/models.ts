@@ -66,6 +66,7 @@ export interface Transaction {
   amount: number;
   category: string;
   bookingId?: string;
+  carId?: string;
   systemGenerated?: boolean;
   createdAt?: string;
 }
@@ -138,6 +139,7 @@ export interface CarReportResponse {
     totalDaysRented: number;
     totalRevenue: number;
     averageRevenuePerRental: number;
+    totalExpenses: number;
   };
   pagination: {
     page: number;
@@ -205,6 +207,40 @@ export interface FinanceReportResponse {
     totalPages: number;
   };
   rows: FinanceReportRow[];
+}
+
+export interface DailyCloseRecord {
+  id: string;
+  closeDate: string;
+  openingBalance: number;
+  totalDebits: number;
+  totalCredits: number;
+  closingBalance: number;
+  status: 'draft' | 'closed' | 'reconciled';
+  isLocked: boolean;
+  closedBy: string | null;
+  closedAt: string;
+}
+
+export interface MonthlyCloseRecord {
+  id: string;
+  year: number;
+  month: number;
+  openingBalance: number;
+  totalDebits: number;
+  totalCredits: number;
+  closingBalance: number;
+  status: 'draft' | 'closed' | 'reconciled';
+  isLocked: boolean;
+  closedBy: string | null;
+  closedAt: string;
+}
+
+export interface FinanceCloseOverview {
+  daily: DailyCloseRecord[];
+  monthly: MonthlyCloseRecord[];
+  latestDaily: DailyCloseRecord | null;
+  latestMonthly: MonthlyCloseRecord | null;
 }
 
 export interface CustomerReportResponse {

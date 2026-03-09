@@ -95,6 +95,18 @@ Additional backend controls (see `.env.example`):
 - `LOGIN_ATTEMPT_WINDOW_MS`
 - `LOGIN_MAX_ATTEMPTS`
 - `LOGIN_LOCKOUT_MS`
+- `PASSWORD_RESET_TOKEN_TTL_MINUTES`
+- `APP_BASE_URL`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_SECURE`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `SMTP_FROM`
+
+Password reset email notes:
+- Configure SMTP variables to send real reset emails from `POST /api/auth/forgot-password`.
+- In development, if SMTP is not configured, the API returns a temporary `resetUrl` in the response for testing.
 
 ## Operations
 Use one backend process manager in production (PM2 or systemd), not multiple concurrent `npm run server`.

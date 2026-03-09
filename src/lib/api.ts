@@ -5,6 +5,7 @@ import type {
   CarReportResponse,
   Customer,
   DashboardPayload,
+  FinanceCloseOverview,
   DiscountType,
   CustomerReportResponse,
   FleetReportResponse,
@@ -66,6 +67,21 @@ export const api = {
     return request<{ token: string; user: User; expiresAt: number }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
+    });
+  },
+  forgotPassword(email: string) {
+    return request<{ success: boolean; message: string; resetUrl?: string; resetToken?: string; expiresAt?: string }>(
+      '/auth/forgot-password',
+      {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      }
+    );
+  },
+  resetPassword(token: string, newPassword: string) {
+    return request<{ success: boolean; message: string }>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, newPassword }),
     });
   },
 
@@ -210,6 +226,27 @@ export const api = {
     if (params?.pageSize) query.set('pageSize', String(params.pageSize));
     const qs = query.toString();
     return request<FinanceReportResponse>(`/reports/finance${qs ? `?${qs}` : ''}`);
+  },
+  getFinanceCloses() {
+    return request<FinanceCloseOverview>('/finance/closes');
+  },
+  closeDailyFinance(date: string) {
+    return request<{ id: string; closeDate: string; closingBalance: number }>(
+      '/finance/close/daily',
+      {
+        method: 'POST',
+        body: JSON.stringify({ date }),
+      }
+    );
+  },
+  closeMonthlyFinance(year: number, month: number) {
+    return request<{ id: string; year: number; month: number; closingBalance: number }>(
+      '/finance/close/monthly',
+      {
+        method: 'POST',
+        body: JSON.stringify({ year, month }),
+      }
+    );
   },
   getCustomerReport(params?: {
     customerId?: string;

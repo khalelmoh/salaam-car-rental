@@ -4,7 +4,7 @@
     align-items: center;
     justify-content: center;
     background-color: var(--background);
-    background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+    background-image: radial-gradient(#e2d9cb 1px, transparent 1px);
     background-size: 20px 20px;
 }
 
@@ -12,7 +12,8 @@
     background-color: var(--surface);
     padding: 2.5rem;
     border-radius: var(--radius-lg);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 28px -10px rgba(62, 47, 38, 0.28), 0 8px 10px -6px rgba(62, 47, 38, 0.18);
     width: 100%;
     max-width: 400px;
     animation: slideUp 0.5s ease-out;
@@ -96,7 +97,7 @@
 
 .input-with-icon input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    box-shadow: var(--focus-ring);
 }
 
 .error-message {
@@ -112,4 +113,29 @@
     text-align: center;
     margin-top: 1rem;
     font-size: 0.875rem;
+}
+
+.login-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-link:hover {
+    text-decoration: underline;
+}
+
+.login-helper {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.success-message {
+    background-color: #ecfdf5;
+    color: #047857;
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    text-align: center;
 }
