@@ -13,6 +13,89 @@
     flex-wrap: wrap;
 }
 
+.finance-report-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.finance-report-range {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+    gap: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: 12px;
+    border: 1px solid #decfb8;
+    background: #fff9f1;
+    box-shadow: inset 0 0 0 1px rgba(191, 163, 122, 0.12);
+}
+
+.finance-report-presets {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.finance-report-preset {
+    border: 1px solid #d6c6ae;
+    border-radius: 999px;
+    background: #fffdf8;
+    color: #5b4738;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.35rem 0.7rem;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.finance-report-preset:hover {
+    border-color: #c2ad8b;
+    background: #f3e6d4;
+    color: #3e2f26;
+}
+
+.finance-report-preset:focus-visible {
+    outline: 3px solid rgba(191, 163, 122, 0.35);
+    outline-offset: 2px;
+}
+
+.finance-report-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.finance-report-field label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #6f5d4d;
+}
+
+.finance-report-field .form-input {
+    min-height: 36px;
+    font-size: 0.86rem;
+}
+
+.finance-report-clear {
+    border: 1px solid #dbcdb9;
+    border-radius: 10px;
+    background: #fffefb;
+    color: #5b4738;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 0.48rem 0.7rem;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.finance-report-clear:hover {
+    border-color: #cbb596;
+    background: #f4eadb;
+    color: #3e2f26;
+}
+
 .finance-kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(200px, 1fr));
@@ -582,6 +665,21 @@
     }
 
     .finance-actions .btn {
+        width: 100%;
+    }
+
+    .finance-report-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .finance-report-range {
+        width: 100%;
+        grid-template-columns: 1fr;
+    }
+
+    .finance-report-actions .btn,
+    .finance-report-clear {
         width: 100%;
     }
 

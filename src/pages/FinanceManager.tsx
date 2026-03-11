@@ -25,6 +25,7 @@ const normalizeTransactions = (items: Transaction[]): Transaction[] =>
   }));
 
 const normalizeIsoDate = (value: string | null | undefined): string => String(value || '').slice(0, 10);
+const toIsoDate = (value: Date): string => value.toISOString().slice(0, 10);
 
 const FinanceManager = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -46,6 +47,8 @@ const FinanceManager = () => {
   const [isPeriodClosingOpen, setIsPeriodClosingOpen] = useState(false);
   const [closeTab, setCloseTab] = useState<'daily' | 'monthly'>('daily');
   const [searchQuery, setSearchQuery] = useState('');
+  const [reportStartDate, setReportStartDate] = useState('');
+  const [reportEndDate, setReportEndDate] = useState('');
 
   const [newDate, setNewDate] = useState('');
   const [newDesc, setNewDesc] = useState('');
@@ -224,7 +227,56 @@ const FinanceManager = () => {
   };
 
   const handleDownloadReport = () => {
-    const rows = transactions.map((trx) => ([
+    setError('');
+    const startDate = normalizeIsoDate(reportStartDate);
+    const endDate = normalizeIsoDate(reportEndDate);
+    if (startDate && endDate && startDate > endDate) {
+      const message = 'Start date must be earlier than or equal to end date.';
+      setError(message);
+      showToast(message, 'error');
+      return;
+    }
+
+    const isWithinRange = (value: string) => {
+      const normalized = normalizeIsoDate(value);
+      if (startDate && normalized < startDate) return false;
+      if (endDate && normalized > endDate) return false;
+      return true;
+    };
+
+    const reportTransactions = transactions.filter((trx) => isWithinRange(trx.date));
+    const bookingById = new Map(bookings.map((b) => [b.id, b]));
+    const reportIncome = reportTransactions
+      .filter((t) => {
+        if (normalizeType(t.type) !== 'Income') return false;
+        if (!t.bookingId) return true;
+        return bookingById.get(t.bookingId)?.paymentStatus === 'paid';
+      })
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    const reportExpenses = reportTransactions
+      .filter((t) => ['Expense', 'Commission'].includes(normalizeType(t.type)))
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    const reportPending = bookings
+      .filter((b) => {
+        if (b.paymentStatus !== 'pending' || b.status === 'cancelled') return false;
+        if (!startDate && !endDate) return true;
+        const bookingStart = normalizeIsoDate(b.startDate);
+        const bookingEnd = normalizeIsoDate(b.endDate);
+        if (startDate && bookingEnd < startDate) return false;
+        if (endDate && bookingStart > endDate) return false;
+        return true;
+      })
+      .reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+    const reportNet = reportIncome - reportExpenses;
+    const rangeLabel = startDate && endDate
+      ? `${formatDateDMY(startDate)} - ${formatDateDMY(endDate)}`
+      : startDate
+        ? `From ${formatDateDMY(startDate)}`
+        : endDate
+          ? `Up to ${formatDateDMY(endDate)}`
+          : 'All Time';
+
+    const rows = reportTransactions.map((trx) => ([
         trx.id,
         formatDateDMY(trx.date),
         trx.description,
@@ -235,22 +287,31 @@ const FinanceManager = () => {
 
     downloadStyledReportPdf({
       title: 'Finance Report',
-      summaryLine: `Income: $${financials.income.toFixed(2)}   Expenses: $${financials.expenses.toFixed(2)}   Net: $${financials.netProfit.toFixed(2)}   Pending: $${financials.pendingAmount.toFixed(2)}`,
+      summaryLine: `Income: $${reportIncome.toFixed(2)}   Expenses: $${reportExpenses.toFixed(2)}   Net: $${reportNet.toFixed(2)}   Pending: $${reportPending.toFixed(2)}`,
       filters: [
-        { label: 'Date Range', value: 'All Time' },
-        { label: 'Rows Exported', value: transactions.length },
+        { label: 'Date Range', value: rangeLabel },
+        { label: 'Rows Exported', value: reportTransactions.length },
       ],
       summaryCards: [
-        { label: 'Income', value: `$${financials.income.toFixed(2)}` },
-        { label: 'Expenses', value: `$${financials.expenses.toFixed(2)}` },
-        { label: 'Net Profit', value: `$${financials.netProfit.toFixed(2)}` },
-        { label: 'Pending', value: `$${financials.pendingAmount.toFixed(2)}` },
+        { label: 'Income', value: `$${reportIncome.toFixed(2)}` },
+        { label: 'Expenses', value: `$${reportExpenses.toFixed(2)}` },
+        { label: 'Net Profit', value: `$${reportNet.toFixed(2)}` },
+        { label: 'Pending', value: `$${reportPending.toFixed(2)}` },
       ],
       headers: ['Transaction ID', 'Date', 'Description', 'Category', 'Type', 'Amount'],
       rows,
-      fileName: `finance-report-${new Date().toISOString().slice(0, 10)}.pdf`,
+      fileName: `finance-report-${startDate || 'all'}-to-${endDate || 'all'}-${new Date().toISOString().slice(0, 10)}.pdf`,
       footerText: 'Salaam Car Rental - Internal Report',
     });
+  };
+
+  const applyReportPreset = (days: number) => {
+    setError('');
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(today.getDate() - (days - 1));
+    setReportStartDate(toIsoDate(start));
+    setReportEndDate(toIsoDate(today));
   };
 
   const refreshCloses = async () => {
@@ -426,9 +487,60 @@ const FinanceManager = () => {
           <Button variant={showForm ? 'danger' : 'primary'} onClick={() => { if (!showForm) resetForm(); setShowForm(!showForm); }}>
             {showForm ? <><X size={18} /> Cancel</> : <><Plus size={18} /> Add Transaction</>}
           </Button>
-          <Button onClick={handleDownloadReport} variant="secondary">
+        </div>
+        <div className="finance-report-actions">
+          <div className="finance-report-range">
+            <div className="finance-report-field">
+              <label htmlFor="finance-report-start">From</label>
+              <input
+                id="finance-report-start"
+                type="date"
+                className="form-input"
+                value={reportStartDate}
+                onChange={(e) => setReportStartDate(e.target.value)}
+              />
+            </div>
+            <div className="finance-report-field">
+              <label htmlFor="finance-report-end">To</label>
+              <input
+                id="finance-report-end"
+                type="date"
+                className="form-input"
+                value={reportEndDate}
+                onChange={(e) => setReportEndDate(e.target.value)}
+              />
+            </div>
+            <div className="finance-report-presets" role="group" aria-label="Quick report ranges">
+              <button type="button" className="finance-report-preset" onClick={() => applyReportPreset(7)}>
+                Last 7 days
+              </button>
+              <button type="button" className="finance-report-preset" onClick={() => applyReportPreset(30)}>
+                Last 30 days
+              </button>
+              <button type="button" className="finance-report-preset" onClick={() => applyReportPreset(90)}>
+                Last 90 days
+              </button>
+            </div>
+          </div>
+          <Button
+            onClick={handleDownloadReport}
+            variant="secondary"
+            disabled={Boolean(reportStartDate && reportEndDate && reportStartDate > reportEndDate)}
+          >
             <Download size={18} /> Download Report
           </Button>
+          {(reportStartDate || reportEndDate) && (
+            <button
+              type="button"
+              className="finance-report-clear"
+              onClick={() => {
+                setReportStartDate('');
+                setReportEndDate('');
+              }}
+            >
+              Clear Dates
+            </button>
+          )}
         </div>
         <button
           type="button"
