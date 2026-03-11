@@ -103,7 +103,12 @@ async function nextCustomerId(client = pool) {
 
 function mapBooking(row) {
   const normalizeDate = (value) => {
-    if (value instanceof Date) return value.toISOString().slice(0, 10);
+    if (value instanceof Date) {
+      const yyyy = value.getFullYear();
+      const mm = String(value.getMonth() + 1).padStart(2, '0');
+      const dd = String(value.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
     const raw = String(value ?? '').trim();
     if (!raw || raw === 'null' || raw === 'undefined') return '';
     return raw.includes('T') ? raw.slice(0, 10) : raw;
@@ -129,7 +134,12 @@ function mapBooking(row) {
 }
 
 function toDateOnly(value) {
-  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  if (value instanceof Date) {
+    const yyyy = value.getFullYear();
+    const mm = String(value.getMonth() + 1).padStart(2, '0');
+    const dd = String(value.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
   const raw = String(value ?? '').trim();
   if (!raw || raw === 'null' || raw === 'undefined') return '';
   return raw.includes('T') ? raw.slice(0, 10) : raw;

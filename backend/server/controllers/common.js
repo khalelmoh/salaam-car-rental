@@ -11,7 +11,10 @@ function toHHMM(value, fallback) {
 
 function toISODate(value) {
   if (value instanceof Date) {
-    return value.toISOString().slice(0, 10);
+    const yyyy = value.getFullYear();
+    const mm = String(value.getMonth() + 1).padStart(2, '0');
+    const dd = String(value.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
   }
   const raw = String(value ?? '').trim();
   if (!raw || raw === 'null' || raw === 'undefined') return '';

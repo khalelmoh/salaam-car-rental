@@ -26,7 +26,7 @@ export function toPeriodBounds(year, month) {
 
 function mapDailyClose(row) {
   const closeDate = row.close_date instanceof Date
-    ? row.close_date.toISOString().slice(0, 10)
+    ? `${row.close_date.getFullYear()}-${String(row.close_date.getMonth() + 1).padStart(2, '0')}-${String(row.close_date.getDate()).padStart(2, '0')}`
     : String(row.close_date || '').slice(0, 10);
   return {
     id: row.id,
