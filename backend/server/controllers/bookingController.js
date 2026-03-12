@@ -3,7 +3,7 @@ import { pool } from '../db/pool.js';
 import { logAudit } from '../services/auditService.js';
 import { makeId } from '../services/security.js';
 import { calculateBookingAmounts, toDateTime } from '../services/bookingMath.js';
-import { assertAccountingPeriodOpen, getPaymentAccountingDate, removeJournalForReference } from '../services/accountingService.js';
+import { removeJournalForReference } from '../services/accountingService.js';
 import { hasBookingOverlap, mapBooking, parsePagination, syncBookingIncomePayment } from './common.js';
 
 const bookingCreateSchema = z.object({
@@ -272,10 +272,6 @@ export async function deleteBooking(req, res, next) {
   try {
     const id = req.params.id;
     const paymentRows = await pool.query('SELECT id FROM payments WHERE booking_id = $1', [id]);
-    for (const payment of paymentRows.rows) {
-      const paymentDate = await getPaymentAccountingDate(payment.id);
-      if (paymentDate) await assertAccountingPeriodOpen(paymentDate);
-    }
 
     await pool.query('BEGIN');
     try {
