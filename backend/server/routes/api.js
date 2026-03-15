@@ -53,6 +53,7 @@ router.get('/api/transactions', transactionController.listTransactions);
 router.post('/api/transactions', requireRole('admin', 'manager'), transactionController.createTransaction);
 router.put('/api/transactions/:id', requireRole('admin', 'manager'), transactionController.updateTransaction);
 router.delete('/api/transactions/:id', requireRole('admin', 'manager'), transactionController.deleteTransaction);
+router.get('/api/finance/close', requireRole('admin', 'manager'), financeCloseController.listCloseOverview);
 router.get('/api/finance/closes', requireRole('admin', 'manager'), financeCloseController.listCloseOverview);
 router.post('/api/finance/close/daily', requireRole('admin', 'manager'), financeCloseController.closeDaily);
 router.post('/api/finance/close/monthly', requireRole('admin', 'manager'), financeCloseController.closeMonthly);
