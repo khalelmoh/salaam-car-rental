@@ -4,7 +4,8 @@ import bcrypt from 'bcrypt';
 export const SESSION_TTL_HOURS = Number(process.env.SESSION_TTL_HOURS || 12);
 
 export function makeId(prefix) {
-  return `${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
+  const suffix = randomUUID().replace(/-/g, '').slice(0, 12);
+  return `${prefix}-${suffix}`;
 }
 
 export function makeToken() {

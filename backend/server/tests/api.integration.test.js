@@ -420,6 +420,13 @@ test('reports golden dataset snapshots + edge cases + export jobs', async () => 
 
     const rangeFrom = '2102-05-01';
     const rangeTo = '2102-05-31';
+    const baseReport = await request(app)
+      .get(`/api/reports/finance?from=${rangeFrom}&to=${rangeTo}&includeDetails=true&page=1&pageSize=100`)
+      .set('Authorization', `Bearer ${authToken}`);
+    assert.equal(baseReport.status, 200);
+    const baseIncome = round2(baseReport.body.summary?.income);
+    const baseExpenses = round2(baseReport.body.summary?.expenses);
+    const basePending = round2(baseReport.body.summary?.pendingAmount);
 
     const createBookingPayload = (startDate, endDate) => ({
       carId: car.id,
@@ -515,10 +522,10 @@ test('reports golden dataset snapshots + edge cases + export jobs', async () => 
     assert.equal(financeReport.body.reportVersion, '1.1');
     assert.equal(financeReport.body.metadata.timezone, 'UTC');
     assert.ok(financeReport.body.metadata.generatedBy?.id);
-    assert.equal(round2(financeReport.body.summary.income), paidBookingAmount);
-    assert.equal(round2(financeReport.body.summary.expenses), 70);
-    assert.equal(round2(financeReport.body.summary.netProfit), round2(paidBookingAmount - 70));
-    assert.equal(round2(financeReport.body.summary.pendingAmount), pendingBookingAmount);
+    assert.equal(round2(financeReport.body.summary.income), round2(baseIncome + paidBookingAmount));
+    assert.equal(round2(financeReport.body.summary.expenses), round2(baseExpenses + 70));
+    assert.equal(round2(financeReport.body.summary.netProfit), round2((baseIncome + paidBookingAmount) - (baseExpenses + 70)));
+    assert.equal(round2(financeReport.body.summary.pendingAmount), round2(basePending + pendingBookingAmount));
     assert.ok(financeReport.body.rows.some((row) => row.bookingId === paidBookingCreate.body.id));
     assert.ok(!financeReport.body.rows.some((row) => row.bookingId === pendingBookingCreate.body.id));
     assert.ok(!financeReport.body.rows.some((row) => row.bookingId === cancelledBookingCreate.body.id));

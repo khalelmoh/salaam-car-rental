@@ -3,6 +3,7 @@ import { logAudit } from '../services/auditService.js';
 import { makeId } from '../services/security.js';
 import {
   assertAccountingPeriodOpen,
+  getExpenseAccountingDate,
   removeJournalForReference,
   syncExpenseJournal,
   syncPaymentJournal,

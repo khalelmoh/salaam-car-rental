@@ -89,36 +89,27 @@ async function upsertJournalEntry({
 
   const debitAccountId = await getAccountId(debitCode);
   const creditAccountId = await getAccountId(creditCode);
-  const existing = await pool.query(
-    `SELECT id
-     FROM journal_entries
-     WHERE reference_type = $1 AND reference_id = $2`,
-    [referenceType, referenceId]
+  const entryId = makeId('JRN');
+  const { rows } = await pool.query(
+    `INSERT INTO journal_entries (id, entry_date, reference_type, reference_id, description, created_by)
+     VALUES ($1, $2::date, $3, $4, $5, $6)
+     ON CONFLICT (reference_type, reference_id)
+     DO UPDATE SET
+       entry_date = EXCLUDED.entry_date,
+       description = EXCLUDED.description,
+       created_by = COALESCE(EXCLUDED.created_by, journal_entries.created_by)
+     RETURNING id`,
+    [entryId, entryDate, referenceType, referenceId, description, createdBy]
   );
-  const entryId = existing.rows[0]?.id || makeId('JRN');
-
-  if (existing.rows[0]) {
-    await pool.query(
-      `UPDATE journal_entries
-       SET entry_date = $1::date, description = $2, created_by = COALESCE($3, created_by)
-       WHERE id = $4`,
-      [entryDate, description, createdBy, entryId]
-    );
-    await pool.query('DELETE FROM journal_lines WHERE entry_id = $1', [entryId]);
-  } else {
-    await pool.query(
-      `INSERT INTO journal_entries (id, entry_date, reference_type, reference_id, description, created_by)
-       VALUES ($1, $2::date, $3, $4, $5, $6)`,
-      [entryId, entryDate, referenceType, referenceId, description, createdBy]
-    );
-  }
+  const finalEntryId = rows[0]?.id || entryId;
+  await pool.query('DELETE FROM journal_lines WHERE entry_id = $1', [finalEntryId]);
 
   await pool.query(
     `INSERT INTO journal_lines (entry_id, account_id, line_type, amount)
      VALUES
        ($1, $2, 'debit', $4::numeric),
        ($1, $3, 'credit', $4::numeric)`,
-    [entryId, debitAccountId, creditAccountId, normalizedAmount.toFixed(2)]
+    [finalEntryId, debitAccountId, creditAccountId, normalizedAmount.toFixed(2)]
   );
 }
 
