@@ -8,7 +8,7 @@
     "server": "node --env-file-if-exists=.env backend/server/main.js",
     "start:prod": "node --env-file-if-exists=.env backend/server/main.js",
     "typecheck": "tsc -b --pretty false",
-    "test:api": "node --env-file-if-exists=.env --test --test-isolation=none backend/server/tests/*.test.js",
+    "test:api": "node scripts/run-api-tests.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
