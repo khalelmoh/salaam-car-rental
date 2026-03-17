@@ -190,7 +190,7 @@ const DashboardHome = () => {
   const [dashboard, setDashboard] = useState<DashboardPayload | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [revenueRange, setRevenueRange] = useState<RevenueRange>('year');
+  const [revenueRange, setRevenueRange] = useState<RevenueRange>('last7');
   const [dailyRevenue, setDailyRevenue] = useState<DailyRevenuePoint[]>([]);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [activityLimit, setActivityLimit] = useState(4);
@@ -330,7 +330,7 @@ const DashboardHome = () => {
                   type="button"
                   className="overview-ghost-btn"
                   onClick={() => {
-                    const order: RevenueRange[] = ['year', 'last90', 'last30', 'last7'];
+                    const order: RevenueRange[] = ['last7', 'last30', 'last90', 'year'];
                     const next = order[(order.indexOf(revenueRange) + 1) % order.length];
                     setRevenueRange(next);
                   }}
