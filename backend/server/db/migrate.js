@@ -1,7 +1,12 @@
 import { pool } from './pool.js';
 
 export async function runMigrations() {
-  await pool.query(`
+  // Tests (and multi-process deploys) can call migrations concurrently.
+  // Use a Postgres advisory lock to make schema init deterministic.
+  const lockKey = Number(process.env.DB_MIGRATION_LOCK_KEY || 7243221);
+  await pool.query('SELECT pg_advisory_lock($1)', [lockKey]);
+  try {
+    await pool.query(`
     CREATE TABLE IF NOT EXISTS roles (
       id SERIAL PRIMARY KEY,
       name TEXT UNIQUE NOT NULL
@@ -236,33 +241,33 @@ export async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_monthly_closes_period ON monthly_closes(close_year DESC, close_month DESC);
   `);
 
-  await pool.query(`
+    await pool.query(`
     ALTER TABLE customers
     ADD COLUMN IF NOT EXISTS damiin_name TEXT NOT NULL DEFAULT '';
   `);
 
-  await pool.query(`
+    await pool.query(`
     ALTER TABLE expenses
     ADD COLUMN IF NOT EXISTS car_id TEXT REFERENCES cars(id) ON DELETE SET NULL;
   `);
 
-  await pool.query(`
+    await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_expenses_car_id ON expenses(car_id);
   `);
 
-  await pool.query(
+    await pool.query(
     `INSERT INTO roles(name)
      VALUES ('admin'), ('manager'), ('staff')
      ON CONFLICT (name) DO NOTHING`
   );
 
-  await pool.query(
+    await pool.query(
     `INSERT INTO branches (id, name, location)
      VALUES ('BR-001', 'Main Branch', 'Hargeisa')
      ON CONFLICT (id) DO NOTHING`
   );
 
-  await pool.query(
+    await pool.query(
     `INSERT INTO accounts (id, code, name, account_type)
      VALUES
        ('ACC-CASH', 'CASH', 'Cash on Hand', 'asset'),
@@ -271,4 +276,7 @@ export async function runMigrations() {
        ('ACC-COMX', 'COMMISSION_EXPENSE', 'Commission Expense', 'expense')
      ON CONFLICT (code) DO NOTHING`
   );
+  } finally {
+    await pool.query('SELECT pg_advisory_unlock($1)', [lockKey]);
+  }
 }
