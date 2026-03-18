@@ -86,7 +86,14 @@ npm run build
 Optional frontend API override:
 - `VITE_API_BASE_URL=http://localhost:4000/api`
 
-If omitted, frontend defaults to `http://localhost:4000/api`.
+If omitted:
+- In local development (`npm run dev`), frontend defaults to `http://localhost:4000/api`.
+- In production builds, frontend defaults to same-origin `/api`.
+
+Vercel deployment:
+- Backend API is served through `api/[...path].js` (same domain as frontend).
+- Set database/env vars in Vercel project settings (`DATABASE_URL` or `PG*`, plus auth/email vars).
+- Only set `VITE_API_BASE_URL` if your backend is hosted on a different domain.
 
 Additional backend controls (see `.env.example`):
 - `SESSION_TTL_HOURS`

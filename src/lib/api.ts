@@ -18,7 +18,9 @@ import type {
   User,
 } from '../types/models';
 
-const RAW_API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
+const RAW_API_BASE =
+  String(import.meta.env.VITE_API_BASE_URL || '').trim() ||
+  (import.meta.env.DEV ? 'http://localhost:4000/api' : '/api');
 const API_BASE = RAW_API_BASE.replace(/\/+$/, '').endsWith('/api')
   ? RAW_API_BASE.replace(/\/+$/, '')
   : `${RAW_API_BASE.replace(/\/+$/, '')}/api`;
@@ -49,8 +51,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   try {
     response = await fetch(`${API_BASE}${path}`, { ...options, headers });
   } catch {
+    const hint = import.meta.env.DEV
+      ? 'Start the backend server with "npm run server".'
+      : 'Make sure `/api` is deployed or set VITE_API_BASE_URL to your backend URL.';
     throw new Error(
-      `Cannot reach API at ${API_BASE}. Start the backend server with "npm run server".`
+      `Cannot reach API at ${API_BASE}. ${hint}`
     );
   }
   const data = await response.json().catch(() => ({}));
