@@ -6,10 +6,27 @@ let initPromise;
 
 function ensureApiPrefix(req) {
   const rawUrl = String(req.url || '/');
-  if (rawUrl === '/api' || rawUrl.startsWith('/api/')) {
+  const parsed = new URL(rawUrl, 'http://localhost');
+
+  // Vercel can route only /api to the function in some project setups.
+  // Frontend can pass the intended Express path through ?__path=...
+  const proxiedPath = parsed.searchParams.get('__path');
+  if (proxiedPath) {
+    const normalized = proxiedPath.startsWith('/') ? proxiedPath : `/${proxiedPath}`;
+    req.url = normalized === '/api' || normalized.startsWith('/api/')
+      ? normalized
+      : `/api${normalized}`;
     return;
   }
-  req.url = rawUrl.startsWith('/') ? `/api${rawUrl}` : `/api/${rawUrl}`;
+
+  const pathname = parsed.pathname || '/';
+  if (pathname === '/api' || pathname.startsWith('/api/')) {
+    return;
+  }
+  req.url = pathname.startsWith('/') ? `/api${pathname}` : `/api/${pathname}`;
+  if (parsed.search) {
+    req.url += parsed.search;
+  }
 }
 
 async function ensureInitialized() {

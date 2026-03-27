@@ -26,6 +26,15 @@ const RAW_API_BASE =
 const API_BASE = RAW_API_BASE.replace(/\/+$/, '').endsWith('/api')
   ? RAW_API_BASE.replace(/\/+$/, '')
   : `${RAW_API_BASE.replace(/\/+$/, '')}/api`;
+const USE_SINGLE_ROUTE_PROXY = !import.meta.env.DEV && API_BASE === '/api';
+
+function buildApiUrl(path: string) {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  if (USE_SINGLE_ROUTE_PROXY) {
+    return `${API_BASE}?__path=${encodeURIComponent(normalizedPath)}`;
+  }
+  return `${API_BASE}${normalizedPath}`;
+}
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers || {});
@@ -33,7 +42,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   let response: Response;
   try {
-    response = await fetch(`${API_BASE}${path}`, {
+    response = await fetch(buildApiUrl(path), {
       ...options,
       headers,
       credentials: 'include',
