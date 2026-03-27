@@ -3,6 +3,12 @@ export type BookingStatus = 'reserved' | 'active' | 'overdue' | 'completed' | 'c
 export type PaymentStatus = 'pending' | 'paid';
 export type TransactionType = 'Income' | 'Expense' | 'Commission';
 export type DiscountType = 'fixed' | 'percent';
+export type LedgerTransactionCategory =
+  | 'RENTAL_INCOME'
+  | 'OFFICE_COMMISSION'
+  | 'REFERRAL_FEE'
+  | 'MAINTENANCE_DEDUCTION';
+export type LedgerEntryDirection = 'credit' | 'debit';
 
 export interface User {
   id: string;
@@ -11,12 +17,15 @@ export interface User {
   role: string;
   name: string;
   title?: string;
+  mustChangePassword?: boolean;
 }
 
 export interface ManagedCar {
   id: string;
   name: string;
   category: string;
+  ownerId?: string;
+  ownerName?: string;
   ownerPhone?: string;
   image: string;
   pricePerDay: number;
@@ -53,6 +62,9 @@ export interface Booking {
   discountAmount?: number;
   subtotalAmount?: number;
   totalAmount: number;
+  isOutsider?: boolean;
+  officeCommissionAmount?: number;
+  referralFeeAmount?: number;
   status: BookingStatus;
   paymentStatus: PaymentStatus;
   createdAt?: string;
@@ -67,8 +79,51 @@ export interface Transaction {
   category: string;
   bookingId?: string;
   carId?: string;
+  ownerPaid?: boolean;
   systemGenerated?: boolean;
   createdAt?: string;
+}
+
+export interface LedgerTransactionEntity {
+  id: string;
+  ownerId: string;
+  vehicleId?: string;
+  bookingId?: string;
+  category: LedgerTransactionCategory;
+  entryDirection: LedgerEntryDirection;
+  amount: number;
+  effectiveDate: string;
+  note?: string;
+  metadata?: Record<string, unknown>;
+  createdBy?: string;
+  createdAt?: string;
+}
+
+export interface Ledger {
+  ownerId: string;
+  ownerName?: string;
+  grossTotal: number;
+  totalCommissions: number;
+  totalReferralFees: number;
+  totalMaintenanceDeductions: number;
+  netOwnerPayout: number;
+}
+
+export interface OwnerPayoutSummary {
+  ownerId: string;
+  ownerName: string;
+  grossTotal: number;
+  totalCommissions: number;
+  totalReferralFees: number;
+  totalMaintenanceDeductions: number;
+  netOwnerPayout: number;
+}
+
+export interface OfficeFinanceSummary {
+  officeIncome: number;
+  officeExpenses: number;
+  netProfit: number;
+  pendingOfficeAmount: number;
 }
 
 export interface AppSettings {
@@ -139,7 +194,7 @@ export interface CarReportResponse {
     totalDaysRented: number;
     totalRevenue: number;
     averageRevenuePerRental: number;
-    totalExpenses: number;
+    totalReferralCommission: number;
   };
   pagination: {
     page: number;

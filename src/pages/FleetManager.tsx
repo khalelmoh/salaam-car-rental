@@ -83,6 +83,7 @@ const FleetManager = () => {
                 const payload = {
                     name: car.name,
                     category: car.category,
+                    ownerName: car.ownerName || car.category,
                     ownerPhone: car.ownerPhone || '',
                     image: car.image,
                     pricePerDay: car.pricePerDay,
@@ -119,7 +120,7 @@ const FleetManager = () => {
     });
 
     return (
-        <DashboardLayout title="Fleet Management">
+        <DashboardLayout title="Vehicles Management">
             {isLoading && <div className="section-card" style={{ marginBottom: '1rem', padding: '1rem' }}>Loading fleet...</div>}
             {error && <div className="section-card" style={{ marginBottom: '1rem', padding: '1rem', color: '#dc2626' }}>{error}</div>}
             <div className="fleet-controls reveal-up">

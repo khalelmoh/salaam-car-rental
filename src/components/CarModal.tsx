@@ -12,18 +12,20 @@ interface CarModalProps {
 }
 
 const PRESET_OWNERS = ['Abdirahman Esse', 'Abdiqani Yusuf', 'Yahye Ali'] as const;
+const EMPTY_CAR_FORM: Partial<ManagedCar> = {
+    name: '',
+    category: '',
+    ownerName: '',
+    ownerPhone: '',
+    licensePlate: '',
+    pricePerDay: 0,
+    status: 'Available',
+    image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800',
+};
 
 const CarModal = ({ isOpen, onClose, onSave, car }: CarModalProps) => {
-    const [formData, setFormData] = useState<Partial<ManagedCar>>(() => car || {
-        name: '',
-        category: '',
-        ownerPhone: '',
-        licensePlate: '',
-        pricePerDay: 0,
-        status: 'Available',
-        image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800'
-    });
-    const initialOwner = car?.category || '';
+    const [formData, setFormData] = useState<Partial<ManagedCar>>(() => car || EMPTY_CAR_FORM);
+    const initialOwner = car?.ownerName || car?.category || '';
     const [ownerSelection, setOwnerSelection] = useState<string>(
         initialOwner && !PRESET_OWNERS.includes(initialOwner as typeof PRESET_OWNERS[number])
             ? 'Other'
@@ -45,10 +47,14 @@ const CarModal = ({ isOpen, onClose, onSave, car }: CarModalProps) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const normalizedInitialOwner = String(initialOwner || '').trim();
+        const normalizedCurrentOwner = String(formData.ownerName || '').trim();
+        const allowOwnerRename = normalizedCurrentOwner !== normalizedInitialOwner;
         await onSave({
             ...formData,
             id: car?.id || Date.now().toString(),
-        } as ManagedCar);
+            allowOwnerRename,
+        } as ManagedCar & { allowOwnerRename?: boolean });
         onClose();
     };
 
@@ -97,10 +103,10 @@ const CarModal = ({ isOpen, onClose, onSave, car }: CarModalProps) => {
                                 const value = e.target.value;
                                 setOwnerSelection(value);
                                 if (value === 'Other') {
-                                    setFormData((prev) => ({ ...prev, category: otherOwnerName }));
+                                    setFormData((prev) => ({ ...prev, ownerName: otherOwnerName, category: otherOwnerName }));
                                     return;
                                 }
-                                setFormData((prev) => ({ ...prev, category: value }));
+                                setFormData((prev) => ({ ...prev, ownerName: value, category: value }));
                             }}
                             required
                         >
@@ -121,7 +127,7 @@ const CarModal = ({ isOpen, onClose, onSave, car }: CarModalProps) => {
                                 onChange={(e) => {
                                     const value = e.target.value;
                                     setOtherOwnerName(value);
-                                    setFormData((prev) => ({ ...prev, category: value }));
+                                    setFormData((prev) => ({ ...prev, ownerName: value, category: value }));
                                 }}
                                 placeholder="Enter owner name"
                                 required

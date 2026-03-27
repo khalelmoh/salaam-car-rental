@@ -15,8 +15,9 @@ export function loadEnvConfig() {
     PGUSER: requireValue('PGUSER'),
     PGPASSWORD: requireValue('PGPASSWORD'),
     PGDATABASE: requireValue('PGDATABASE'),
-    CORS_ORIGIN: String(process.env.CORS_ORIGIN || '*'),
+    CORS_ORIGIN: String(process.env.CORS_ORIGIN || 'http://localhost:5173'),
     APP_BASE_URL: String(process.env.APP_BASE_URL || ''),
+    ADMIN_BOOTSTRAP_PASSWORD: String(process.env.ADMIN_BOOTSTRAP_PASSWORD || ''),
     SESSION_TTL_HOURS: Number(process.env.SESSION_TTL_HOURS || 12),
     SMTP_HOST: String(process.env.SMTP_HOST || ''),
     SMTP_PORT: Number(process.env.SMTP_PORT || 587),
@@ -34,6 +35,22 @@ export function loadEnvConfig() {
   }
   if (!Number.isFinite(config.SMTP_PORT) || config.SMTP_PORT <= 0) {
     throw new Error('Invalid SMTP_PORT environment variable.');
+  }
+
+  const corsOrigins = String(config.CORS_ORIGIN || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+  if (corsOrigins.length === 0) {
+    throw new Error('CORS_ORIGIN must include at least one allowed origin.');
+  }
+  if (config.NODE_ENV === 'production') {
+    if (corsOrigins.includes('*')) {
+      throw new Error('CORS_ORIGIN cannot contain "*" in production.');
+    }
+    if (!config.ADMIN_BOOTSTRAP_PASSWORD || config.ADMIN_BOOTSTRAP_PASSWORD === 'admin') {
+      throw new Error('Set ADMIN_BOOTSTRAP_PASSWORD to a non-default value in production.');
+    }
   }
   return config;
 }

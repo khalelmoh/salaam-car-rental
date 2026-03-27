@@ -48,7 +48,7 @@ const CarTable = ({ cars, onEdit, onDelete, onViewReport }: CarTableProps) => {
                                         </div>
                                     </div>
                                 </td>
-                                <td>{car.category}</td>
+                                <td>{car.ownerName || car.category || '--'}</td>
                                 <td>{car.licensePlate || 'ABC-1234'}</td>
                                 <td>${car.pricePerDay}</td>
                                 <td>{getStatusBadge(car.status || 'Available')}</td>

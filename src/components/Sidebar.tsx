@@ -28,7 +28,7 @@ const Sidebar = () => {
 
                 <NavLink to="/fleet" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                     <Car size={20} />
-                    <span>Fleet Manager</span>
+                    <span>Vehicles Manager</span>
                 </NavLink>
 
                 <NavLink to="/bookings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { BellRing, KeyRound, Save, UserRound } from 'lucide-react';
 import DashboardLayout from '../layouts/DashboardLayout';
 import Button from '../components/Button';
@@ -7,11 +8,15 @@ import type { AppSettings } from '../types/models';
 import './Settings.css';
 
 const Settings = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const forcePasswordChange = searchParams.get('forcePasswordChange') === '1';
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isSavingBookingNotifications, setIsSavingBookingNotifications] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [mustChangePassword, setMustChangePassword] = useState(false);
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
 
   const [profileForm, setProfileForm] = useState({
@@ -35,7 +40,9 @@ const Settings = () => {
       setError('');
       try {
         setIsLoading(true);
-        const [me, settings] = await Promise.all([api.me(), api.getSettings()]);
+        const me = await api.me();
+        const requiresPasswordRotation = Boolean(me.user.mustChangePassword);
+        setMustChangePassword(requiresPasswordRotation);
         setProfileForm((prev) => ({
           ...prev,
           username: me.user.username || '',
@@ -43,6 +50,12 @@ const Settings = () => {
           name: me.user.name || '',
           title: me.user.title || '',
         }));
+        if (requiresPasswordRotation) {
+          setAppSettings(null);
+          return;
+        }
+
+        const settings = await api.getSettings();
         setAppSettings(settings);
         setBookingNotificationForm({
           bookingNotificationsEnabled: settings.bookingNotificationsEnabled !== false,
@@ -69,6 +82,10 @@ const Settings = () => {
     }
     if (profileForm.newPassword && profileForm.newPassword !== profileForm.confirmPassword) {
       setError('New password and confirm password do not match.');
+      return;
+    }
+    if (mustChangePassword && !profileForm.newPassword) {
+      setError('Set a new password to complete required password rotation.');
       return;
     }
 
@@ -103,7 +120,12 @@ const Settings = () => {
         newPassword: '',
         confirmPassword: '',
       }));
+      const stillRequiresRotation = Boolean(updated.user.mustChangePassword);
+      setMustChangePassword(stillRequiresRotation);
       setSuccess('Profile updated successfully.');
+      if (!stillRequiresRotation && forcePasswordChange) {
+        navigate('/settings', { replace: true });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update profile.');
     } finally {
@@ -152,6 +174,11 @@ const Settings = () => {
   return (
     <DashboardLayout title="Settings">
       {isLoading && <div className="settings-status">Loading settings...</div>}
+      {!isLoading && (forcePasswordChange || mustChangePassword) && (
+        <div className="settings-status settings-error">
+          Password rotation is required. Update your password before continuing.
+        </div>
+      )}
       {error && <div className="settings-status settings-error">{error}</div>}
       {success && <div className="settings-status settings-success">{success}</div>}
 
@@ -226,47 +253,49 @@ const Settings = () => {
             </form>
           </section>
 
-          <section className="settings-card">
-            <h3><BellRing size={18} /> Booking End-Time Notifications</h3>
-            <form onSubmit={handleBookingNotificationsSave} className="settings-form">
-              <label className="settings-toggle-row">
-                <input
-                  type="checkbox"
-                  checked={bookingNotificationForm.bookingNotificationsEnabled}
-                  onChange={(e) => setBookingNotificationForm((prev) => ({ ...prev, bookingNotificationsEnabled: e.target.checked }))}
-                />
-                <span>Enable automated booking end-time notifications</span>
-              </label>
+          {!mustChangePassword && (
+            <section className="settings-card">
+              <h3><BellRing size={18} /> Booking End-Time Notifications</h3>
+              <form onSubmit={handleBookingNotificationsSave} className="settings-form">
+                <label className="settings-toggle-row">
+                  <input
+                    type="checkbox"
+                    checked={bookingNotificationForm.bookingNotificationsEnabled}
+                    onChange={(e) => setBookingNotificationForm((prev) => ({ ...prev, bookingNotificationsEnabled: e.target.checked }))}
+                  />
+                  <span>Enable automated booking end-time notifications</span>
+                </label>
 
-              <label>
-                Reminder Before End (minutes)
-                <input
-                  type="number"
-                  min={0}
-                  max={120}
-                  value={bookingNotificationForm.bookingReminderMinutes}
-                  onChange={(e) => setBookingNotificationForm((prev) => ({ ...prev, bookingReminderMinutes: e.target.value }))}
-                  disabled={!bookingNotificationForm.bookingNotificationsEnabled}
-                />
-              </label>
+                <label>
+                  Reminder Before End (minutes)
+                  <input
+                    type="number"
+                    min={0}
+                    max={120}
+                    value={bookingNotificationForm.bookingReminderMinutes}
+                    onChange={(e) => setBookingNotificationForm((prev) => ({ ...prev, bookingReminderMinutes: e.target.value }))}
+                    disabled={!bookingNotificationForm.bookingNotificationsEnabled}
+                  />
+                </label>
 
-              <label className="settings-toggle-row">
-                <input
-                  type="checkbox"
-                  checked={bookingNotificationForm.autoMarkOverdue}
-                  onChange={(e) => setBookingNotificationForm((prev) => ({ ...prev, autoMarkOverdue: e.target.checked }))}
-                  disabled={!bookingNotificationForm.bookingNotificationsEnabled}
-                />
-                <span>Automatically mark booking as Overdue when end time is reached</span>
-              </label>
+                <label className="settings-toggle-row">
+                  <input
+                    type="checkbox"
+                    checked={bookingNotificationForm.autoMarkOverdue}
+                    onChange={(e) => setBookingNotificationForm((prev) => ({ ...prev, autoMarkOverdue: e.target.checked }))}
+                    disabled={!bookingNotificationForm.bookingNotificationsEnabled}
+                  />
+                  <span>Automatically mark booking as Overdue when end time is reached</span>
+                </label>
 
-              <div className="settings-actions">
-                <Button type="submit" disabled={isSavingBookingNotifications}>
-                  <Save size={16} /> {isSavingBookingNotifications ? 'Saving...' : 'Save Notification Settings'}
-                </Button>
-              </div>
-            </form>
-          </section>
+                <div className="settings-actions">
+                  <Button type="submit" disabled={isSavingBookingNotifications}>
+                    <Save size={16} /> {isSavingBookingNotifications ? 'Saving...' : 'Save Notification Settings'}
+                  </Button>
+                </div>
+              </form>
+            </section>
+          )}
         </div>
       )}
     </DashboardLayout>

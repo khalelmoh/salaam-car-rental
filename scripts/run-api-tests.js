@@ -23,5 +23,11 @@ if (shouldUseNoIsolation()) {
 }
 nodeArgs.push(...getTestFiles());
 
-const result = spawnSync(process.execPath, nodeArgs, { stdio: 'inherit' });
+const result = spawnSync(process.execPath, nodeArgs, {
+  stdio: 'inherit',
+  env: {
+    ...process.env,
+    NODE_ENV: process.env.NODE_ENV || 'test',
+  },
+});
 process.exit(result.status ?? 1);

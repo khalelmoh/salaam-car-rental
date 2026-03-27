@@ -1290,15 +1290,14 @@ const server = http.createServer(async (req, res) => {
         return;
       }
       const type = String(body.type);
+      const normalizedCarId = typeof body.carId === 'string' ? body.carId.trim() : '';
       if (type === 'Expense') {
-        if (!body.carId) {
-          json(res, 400, { error: 'Field "carId" is required for Expense transactions.' });
-          return;
-        }
-        const carExists = db.cars.some((car) => car.id === body.carId);
-        if (!carExists) {
-          json(res, 400, { error: 'Selected vehicle does not exist.' });
-          return;
+        if (normalizedCarId) {
+          const carExists = db.cars.some((car) => car.id === normalizedCarId);
+          if (!carExists) {
+            json(res, 400, { error: 'Selected vehicle does not exist.' });
+            return;
+          }
         }
       }
       const transaction = {
@@ -1308,7 +1307,7 @@ const server = http.createServer(async (req, res) => {
         type: body.type,
         amount,
         category: body.category,
-        carId: body.type === 'Expense' ? body.carId : body.carId || '',
+        carId: normalizedCarId,
         createdAt: new Date().toISOString(),
       };
       db.transactions.unshift(transaction);
@@ -1340,17 +1339,17 @@ const server = http.createServer(async (req, res) => {
         json(res, 400, { error: 'amount must be a number greater than zero.' });
         return;
       }
+      const normalizedCarId = typeof merged.carId === 'string' ? merged.carId.trim() : '';
       if (merged.type === 'Expense') {
-        if (!merged.carId) {
-          json(res, 400, { error: 'Field "carId" is required for Expense transactions.' });
-          return;
-        }
-        const carExists = db.cars.some((car) => car.id === merged.carId);
-        if (!carExists) {
-          json(res, 400, { error: 'Selected vehicle does not exist.' });
-          return;
+        if (normalizedCarId) {
+          const carExists = db.cars.some((car) => car.id === normalizedCarId);
+          if (!carExists) {
+            json(res, 400, { error: 'Selected vehicle does not exist.' });
+            return;
+          }
         }
       }
+      merged.carId = normalizedCarId;
       db.transactions[idx] = merged;
       await writeDb(db);
       json(res, 200, merged);

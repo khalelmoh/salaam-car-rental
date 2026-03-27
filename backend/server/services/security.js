@@ -2,6 +2,7 @@ import { createHash, randomUUID, scryptSync, timingSafeEqual } from 'node:crypto
 import bcrypt from 'bcrypt';
 
 export const SESSION_TTL_HOURS = Number(process.env.SESSION_TTL_HOURS || 12);
+export const SESSION_COOKIE_NAME = String(process.env.SESSION_COOKIE_NAME || 'salaam_session');
 
 export function makeId(prefix) {
   const suffix = randomUUID().replace(/-/g, '').slice(0, 12);
@@ -24,7 +25,37 @@ export function sanitizeUser(row) {
     role: row.role_name,
     name: row.name,
     title: row.title || '',
+    mustChangePassword: Boolean(row.must_change_password),
   };
+}
+
+function resolveCookieSecure() {
+  if (String(process.env.COOKIE_SECURE || '').toLowerCase() === 'true') return true;
+  return String(process.env.NODE_ENV || '').toLowerCase() === 'production';
+}
+
+function sessionCookieBaseOptions() {
+  return {
+    httpOnly: true,
+    secure: resolveCookieSecure(),
+    sameSite: 'lax',
+    path: '/',
+  };
+}
+
+export function setSessionCookie(res, token, expiresAt) {
+  res.cookie(SESSION_COOKIE_NAME, token, {
+    ...sessionCookieBaseOptions(),
+    expires: expiresAt,
+  });
+}
+
+export function clearSessionCookie(res) {
+  res.cookie(SESSION_COOKIE_NAME, '', {
+    ...sessionCookieBaseOptions(),
+    expires: new Date(0),
+    maxAge: 0,
+  });
 }
 
 export async function hashPassword(password) {

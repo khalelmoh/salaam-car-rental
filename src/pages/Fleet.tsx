@@ -36,7 +36,7 @@ const Fleet = () => {
     const categories = useMemo(() => {
         const all = new Set(['All']);
         for (const car of cars) {
-            all.add(car.category);
+            all.add(car.ownerName || car.category || 'Unassigned');
         }
         return Array.from(all);
     }, [cars]);
@@ -44,7 +44,7 @@ const Fleet = () => {
     const filteredCars = useMemo(() => {
         const scoped = activeCategory === 'All'
             ? cars
-            : cars.filter((car) => car.category === activeCategory);
+            : cars.filter((car) => (car.ownerName || car.category || 'Unassigned') === activeCategory);
 
         return [...scoped].sort((a, b) => {
             if (sortBy === 'price-asc') return a.pricePerDay - b.pricePerDay;

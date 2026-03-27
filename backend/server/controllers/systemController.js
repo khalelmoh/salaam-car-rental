@@ -15,30 +15,6 @@ function toDateOnly(value) {
   return raw.includes('T') ? raw.slice(0, 10) : raw;
 }
 
-function resolvePeriodBounds(period, from, to, month, year) {
-  if (period === 'range' && from && to) {
-    return { startDate: from, endDate: to };
-  }
-
-  if (period === 'monthly' && month && year) {
-    const start = new Date(Date.UTC(year, month - 1, 1));
-    const end = new Date(Date.UTC(year, month, 0));
-    return {
-      startDate: start.toISOString().slice(0, 10),
-      endDate: end.toISOString().slice(0, 10),
-    };
-  }
-
-  if (period === 'yearly' && year) {
-    return {
-      startDate: `${year}-01-01`,
-      endDate: `${year}-12-31`,
-    };
-  }
-
-  return { startDate: null, endDate: null };
-}
-
 export async function dashboard(_req, res, next) {
   try {
     const [fleet, active, revenue, statuses, activities, monthly] = await Promise.all([
@@ -282,52 +258,11 @@ export async function carReport(req, res, next) {
     const totalRevenue = mapped.reduce((sum, row) => sum + row.amountPaid, 0);
     const rentedRows = mapped.filter((row) => String(row.status || '').toLowerCase() !== 'cancelled');
     const totalDaysRented = rentedRows.reduce((sum, row) => sum + row.rentalDays, 0);
-    const { startDate, endDate } = resolvePeriodBounds(period, from, to, month, year);
-    const legacyMatchValues = [
-      String(carResult.rows[0].id || '').trim().toLowerCase(),
-      String(carResult.rows[0].name || '').trim().toLowerCase(),
-      String(carResult.rows[0].license_plate || '').trim().toLowerCase(),
-    ].filter(Boolean);
-    const legacyLikePatterns = legacyMatchValues.map((value) => `%${value}%`);
-
-    const expenseTotalResult = await pool.query(
-      `
-        SELECT COALESCE(SUM(e.amount), 0)::numeric AS total
-        FROM expenses e
-        WHERE (
-          e.car_id = $1
-          OR (
-            e.car_id IS NULL
-            AND (
-              LOWER(TRIM(COALESCE(e.category, ''))) = ANY($4::text[])
-              OR EXISTS (
-                SELECT 1
-                FROM unnest($5::text[]) AS p(pattern)
-                WHERE LOWER(COALESCE(e.description, '')) LIKE p.pattern
-              )
-            )
-          )
-        )
-        AND ($2::date IS NULL OR e.expense_date >= $2::date)
-        AND ($3::date IS NULL OR e.expense_date <= $3::date)
-      `,
-      [carId, startDate, endDate, legacyMatchValues, legacyLikePatterns]
-    );
-
-    const commissionTotalResult = await pool.query(
-      `
-        SELECT COALESCE(SUM(p.amount), 0)::numeric AS total
-        FROM payments p
-        JOIN bookings b ON b.id = p.booking_id
-        WHERE b.car_id = $1
-          AND LOWER(COALESCE(p.payment_method, '')) = 'commission'
-          AND ($2::date IS NULL OR p.paid_at::date >= $2::date)
-          AND ($3::date IS NULL OR p.paid_at::date <= $3::date)
-      `,
-      [carId, startDate, endDate]
-    );
-
-    const totalExpenses = Number(expenseTotalResult.rows[0]?.total || 0) + Number(commissionTotalResult.rows[0]?.total || 0);
+    const totalReferralCommission = rows.reduce((sum, row) => {
+      if (String(row.status || '').toLowerCase() === 'cancelled') return sum;
+      if (!Boolean(row.is_outsider)) return sum;
+      return sum + Number(row.referral_fee_amount || 0);
+    }, 0);
     const paginated = allRows ? mapped : mapped.slice((page - 1) * pageSize, page * pageSize);
 
     res.json({
@@ -344,7 +279,7 @@ export async function carReport(req, res, next) {
         totalDaysRented,
         totalRevenue: Number(totalRevenue.toFixed(2)),
         averageRevenuePerRental: mapped.length ? Number((totalRevenue / mapped.length).toFixed(2)) : 0,
-        totalExpenses: Number(totalExpenses.toFixed(2)),
+        totalReferralCommission: Number(totalReferralCommission.toFixed(2)),
       },
       pagination: {
         page: allRows ? 1 : page,

@@ -1,7 +1,7 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-import { api, clearAuthToken, getAuthToken } from '../lib/api';
+import { api } from '../lib/api';
 import { clearAuthState, storeUser } from '../lib/auth';
 
 interface ProtectedRouteProps {
@@ -9,31 +9,26 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+    const location = useLocation();
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [mustRotatePassword, setMustRotatePassword] = useState(false);
 
     useEffect(() => {
         let active = true;
         const run = async () => {
-            const token = getAuthToken();
-            if (!token) {
-                if (active) {
-                    setIsAuthenticated(false);
-                    setIsLoading(false);
-                }
-                return;
-            }
             try {
                 const res = await api.me();
                 storeUser(res.user);
                 if (active) {
                     setIsAuthenticated(true);
+                    setMustRotatePassword(Boolean(res.user.mustChangePassword));
                 }
             } catch {
-                clearAuthToken();
                 clearAuthState();
                 if (active) {
                     setIsAuthenticated(false);
+                    setMustRotatePassword(false);
                 }
             } finally {
                 if (active) {
@@ -53,6 +48,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
+    }
+
+    if (mustRotatePassword && location.pathname !== '/settings') {
+        return <Navigate to="/settings?forcePasswordChange=1" replace />;
     }
 
     return <>{children}</>;

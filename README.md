@@ -9,9 +9,10 @@ This project is now a full-stack car rental management system with:
 - Error/success/loading feedback across pages
 - Protected routes and logout flow
 
-Default login:
-- `admin@salaam.com`
-- `admin`
+Bootstrap admin login:
+- Email: `admin@salaam.com`
+- Password: value of `ADMIN_BOOTSTRAP_PASSWORD` (defaults to `admin` only in local dev if unset)
+- On first bootstrap, admin password rotation is required before accessing protected business endpoints.
 
 ## Architecture
 ### Frontend (`src/`)
@@ -96,6 +97,10 @@ Vercel deployment:
 - Only set `VITE_API_BASE_URL` if your backend is hosted on a different domain.
 
 Additional backend controls (see `.env.example`):
+- `ADMIN_BOOTSTRAP_PASSWORD`
+- `ALLOW_LOCALHOST_CORS` (defaults to `true`; set `false` to block localhost origins)
+- `SESSION_COOKIE_NAME`
+- `COOKIE_SECURE`
 - `SESSION_TTL_HOURS`
 - `LOGIN_RATE_LIMIT_WINDOW_MS`
 - `LOGIN_RATE_LIMIT_MAX_REQUESTS`

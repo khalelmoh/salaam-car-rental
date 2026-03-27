@@ -24,7 +24,11 @@ const Login = () => {
         setError('');
 
         try {
-            await login(email, password);
+            const user = await login(email, password);
+            if (user.mustChangePassword) {
+                navigate('/settings?forcePasswordChange=1');
+                return;
+            }
             navigate('/');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed.');

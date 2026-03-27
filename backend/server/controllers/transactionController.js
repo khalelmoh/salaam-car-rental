@@ -9,6 +9,7 @@ import {
   syncPaymentJournal,
 } from '../services/accountingService.js';
 import { parsePagination } from './common.js';
+import { recordMaintenanceDeduction } from './ownerLedgerController.js';
 
 function mapTransactionRow(row) {
   return {
@@ -99,18 +100,49 @@ export async function createTransaction(req, res, next) {
 
     if (type === 'Expense') {
       const carId = String(body.carId || '').trim();
-      if (!carId) {
-        return res.status(400).json({ error: 'Field "carId" is required for Expense transactions.' });
+      const isOwnerPaidMaintenance = Boolean(body.ownerPaid) && String(body.category || '').toLowerCase() === 'maintenance';
+      let car = { rows: [] };
+      if (carId) {
+        car = await pool.query('SELECT id, owner_id FROM cars WHERE id = $1', [carId]);
+        if (!car.rows[0]) {
+          return res.status(400).json({ error: 'Selected vehicle does not exist.' });
+        }
       }
-      const car = await pool.query('SELECT id FROM cars WHERE id = $1', [carId]);
-      if (!car.rows[0]) {
-        return res.status(400).json({ error: 'Selected vehicle does not exist.' });
+
+      if (isOwnerPaidMaintenance) {
+        if (!carId) {
+          return res.status(400).json({ error: 'Select a vehicle for owner-paid maintenance expenses.' });
+        }
+        if (!car.rows[0].owner_id) {
+          return res.status(409).json({ error: 'This vehicle has no linked owner for maintenance deduction.' });
+        }
+        const ledgerId = await recordMaintenanceDeduction({
+          ownerId: car.rows[0].owner_id,
+          vehicleId: carId,
+          bookingId: body.bookingId || null,
+          amount,
+          note: body.description || 'Owner-paid maintenance deduction',
+          effectiveDate: body.date,
+          userId: req.auth.userId,
+        });
+        await logAudit({ userId: req.auth.userId, action: 'create', entity: 'owner_ledger_transaction', entityId: ledgerId });
+        return res.status(201).json({
+          id: ledgerId,
+          date: body.date,
+          description: body.description || 'Owner-paid maintenance deduction',
+          type: 'Expense',
+          amount,
+          category: 'MAINTENANCE_DEDUCTION',
+          carId,
+          ownerPaid: true,
+        });
       }
+
       const id = makeId('TRX');
       await pool.query(
         `INSERT INTO expenses (id, amount, description, category, car_id, expense_date, created_by)
          VALUES ($1, $2, $3, $4, $5, $6::date, $7)`,
-        [id, amount, body.description, body.category, carId, body.date, req.auth.userId]
+        [id, amount, body.description, body.category, carId || null, body.date, req.auth.userId]
       );
       await syncExpenseJournal(id, req.auth.userId);
       await logAudit({ userId: req.auth.userId, action: 'create', entity: 'expense', entityId: id });
@@ -121,7 +153,7 @@ export async function createTransaction(req, res, next) {
         type: 'Expense',
         amount,
         category: body.category,
-        carId,
+        carId: carId || undefined,
       });
     }
 
@@ -196,13 +228,15 @@ export async function updateTransaction(req, res, next) {
     const existingExpenseDate = await getExpenseAccountingDate(id);
     if (existingExpenseDate) await assertAccountingPeriodOpen(existingExpenseDate);
     const targetExpenseDate = body.date || expense.rows[0].expense_date;
-    const finalCarId = String(body.carId || expense.rows[0].car_id || '').trim();
-    if (!finalCarId) {
-      return res.status(400).json({ error: 'Field "carId" is required for Expense transactions.' });
-    }
-    const car = await pool.query('SELECT id FROM cars WHERE id = $1', [finalCarId]);
-    if (!car.rows[0]) {
-      return res.status(400).json({ error: 'Selected vehicle does not exist.' });
+    const hasIncomingCarId = Object.prototype.hasOwnProperty.call(body, 'carId');
+    const finalCarId = hasIncomingCarId
+      ? String(body.carId || '').trim()
+      : String(expense.rows[0].car_id || '').trim();
+    if (finalCarId) {
+      const car = await pool.query('SELECT id FROM cars WHERE id = $1', [finalCarId]);
+      if (!car.rows[0]) {
+        return res.status(400).json({ error: 'Selected vehicle does not exist.' });
+      }
     }
 
     await pool.query(
@@ -213,7 +247,7 @@ export async function updateTransaction(req, res, next) {
         Number(body.amount || expense.rows[0].amount),
         body.description || expense.rows[0].description,
         body.category || expense.rows[0].category,
-        finalCarId,
+        finalCarId || null,
         targetExpenseDate,
         id,
       ]
@@ -228,7 +262,7 @@ export async function updateTransaction(req, res, next) {
       type: 'Expense',
       amount: Number(body.amount || expense.rows[0].amount),
       category: body.category || expense.rows[0].category,
-      carId: finalCarId,
+      carId: finalCarId || undefined,
     });
   } catch (error) {
     next(error);

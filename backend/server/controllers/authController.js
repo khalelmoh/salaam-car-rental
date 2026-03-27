@@ -2,10 +2,12 @@ import { z } from 'zod';
 import { pool } from '../db/pool.js';
 import { logAudit } from '../services/auditService.js';
 import {
+  clearSessionCookie,
   makeId,
   makeToken,
   hashResetToken,
   sanitizeUser,
+  setSessionCookie,
   hashPassword,
   verifyPassword,
   SESSION_TTL_HOURS,
@@ -151,6 +153,7 @@ export async function login(req, res, next) {
       'INSERT INTO sessions (token, user_id, expires_at) VALUES ($1, $2, $3::timestamptz)',
       [token, user.id, expiresAt.toISOString()]
     );
+    setSessionCookie(res, token, expiresAt);
 
     await logAudit({ userId: user.id, action: 'login', entity: 'auth', entityId: user.id });
 
@@ -171,6 +174,7 @@ export async function me(req, res) {
 export async function logout(req, res, next) {
   try {
     await pool.query('DELETE FROM sessions WHERE token = $1', [req.auth.token]);
+    clearSessionCookie(res);
     await logAudit({ userId: req.auth.userId, action: 'logout', entity: 'auth', entityId: req.auth.userId });
     res.json({ success: true });
   } catch (error) {
@@ -190,10 +194,21 @@ export async function updateProfile(req, res, next) {
     if (!rows[0]) return sendError(res, 404, 'USER_NOT_FOUND', 'User not found.');
 
     const user = rows[0];
+    if (req.auth.mustChangePassword && !payload.newPassword) {
+      return sendError(
+        res,
+        400,
+        'AUTH_PASSWORD_ROTATION_REQUIRED',
+        'You must set a new password before continuing.'
+      );
+    }
+
+    let mustChangePassword = Boolean(user.must_change_password);
     if (payload.newPassword) {
       const ok = await verifyPassword(payload.currentPassword || '', user.password_hash);
       if (!ok) return sendError(res, 400, 'AUTH_INVALID_PASSWORD', 'Current password is invalid.');
       user.password_hash = await hashPassword(payload.newPassword);
+      mustChangePassword = false;
     }
 
     user.username = payload.username ?? user.username;
@@ -203,13 +218,13 @@ export async function updateProfile(req, res, next) {
 
     await pool.query(
       `UPDATE users
-       SET username = $1, email = $2, name = $3, title = $4, password_hash = $5
-       WHERE id = $6`,
-      [user.username, user.email, user.name, user.title, user.password_hash, user.id]
+       SET username = $1, email = $2, name = $3, title = $4, password_hash = $5, must_change_password = $6
+       WHERE id = $7`,
+      [user.username, user.email, user.name, user.title, user.password_hash, mustChangePassword, user.id]
     );
 
     const joined = await pool.query(
-      `SELECT u.id, u.username, u.email, u.name, u.title, r.name AS role_name
+      `SELECT u.id, u.username, u.email, u.name, u.title, u.must_change_password, r.name AS role_name
        FROM users u JOIN roles r ON r.id = u.role_id WHERE u.id = $1`,
       [user.id]
     );

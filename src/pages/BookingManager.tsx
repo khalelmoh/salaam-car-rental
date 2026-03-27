@@ -31,6 +31,7 @@ const BookingManager = () => {
   const [endTime, setEndTime] = useState('17:00');
   const [discountType, setDiscountType] = useState<DiscountType>('fixed');
   const [discountValue, setDiscountValue] = useState('');
+  const [referralCommissionValue, setReferralCommissionValue] = useState('');
 
   const normalizeBookingTimes = (items: Booking[]) =>
     items.map((item) => ({
@@ -117,6 +118,11 @@ const BookingManager = () => {
       setError('Percentage discount cannot exceed 100.');
       return;
     }
+    const parsedReferralCommission = Number(referralCommissionValue || 0);
+    if (Number.isNaN(parsedReferralCommission) || parsedReferralCommission < 0) {
+      setError('Referral commission must be zero or greater.');
+      return;
+    }
     const selectedCar = cars.find((c) => c.id === selectedCarId);
     if (selectedCar && selectedCar.status !== 'Available') {
       setError(`Selected vehicle is ${selectedCar.status.toLowerCase()} and cannot be booked.`);
@@ -133,6 +139,8 @@ const BookingManager = () => {
         endTime,
         discountType,
         discountValue: parsedDiscountValue,
+        isOutsider: parsedReferralCommission > 0,
+        referralFeeAmount: parsedReferralCommission,
       });
       const bookingWithTimes: Booking = {
         ...booking,
@@ -160,6 +168,7 @@ const BookingManager = () => {
     setEndTime('17:00');
     setDiscountType('fixed');
     setDiscountValue('');
+    setReferralCommissionValue('');
   };
 
   const updateStatus = async (id: string, newStatus: Booking['status']) => {
@@ -389,6 +398,18 @@ const BookingManager = () => {
                   value={discountValue}
                   onChange={(e) => setDiscountValue(e.target.value)}
                   placeholder={discountType === 'percent' ? 'e.g. 10' : 'e.g. 25'}
+                />
+              </div>
+              <div className="form-group">
+                <label>Referral Commission</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="form-input"
+                  value={referralCommissionValue}
+                  onChange={(e) => setReferralCommissionValue(e.target.value)}
+                  placeholder="e.g. 15"
                 />
               </div>
             </div>

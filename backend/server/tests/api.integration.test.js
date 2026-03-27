@@ -62,6 +62,100 @@ test('bookings: rejects invalid payload', async () => {
   assert.match(String(response.body.error || ''), /invalid|required/i);
 });
 
+test('owner payout summary syncs on booking create and delete', async () => {
+  const carsRes = await request(app).get('/api/cars').set('Authorization', `Bearer ${authToken}`);
+  const customersRes = await request(app).get('/api/customers').set('Authorization', `Bearer ${authToken}`);
+  assert.equal(carsRes.status, 200);
+  assert.equal(customersRes.status, 200);
+  assert.ok(Array.isArray(carsRes.body) && carsRes.body.length > 0);
+  assert.ok(Array.isArray(customersRes.body) && customersRes.body.length > 0);
+
+  let car = carsRes.body.find((c) => c.status === 'Available' && c.ownerId) ||
+    carsRes.body.find((c) => c.ownerId) ||
+    carsRes.body.find((c) => c.status === 'Available') ||
+    carsRes.body[0];
+
+  // Ensure the booking car has an owner so payout summary can track it.
+  if (!car.ownerId) {
+    const unique = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    const updateCar = await request(app)
+      .put(`/api/cars/${car.id}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        ownerPhone: `+25263${unique.slice(-6)}`,
+        ownerName: `Owner ${unique.slice(-4)}`,
+      });
+    assert.equal(updateCar.status, 200);
+    car = updateCar.body;
+    assert.ok(car.ownerId);
+  }
+
+  const customer = customersRes.body[0];
+  const ownerId = car.ownerId;
+  let createdBookingId = null;
+
+  const readOwnerTotals = async () => {
+    const payoutsRes = await request(app)
+      .get('/api/owners/payout-summaries')
+      .set('Authorization', `Bearer ${authToken}`);
+    assert.equal(payoutsRes.status, 200);
+    const row = payoutsRes.body.find((item) => item.ownerId === ownerId);
+    return {
+      grossTotal: Number(row?.grossTotal || 0),
+      totalCommissions: Number(row?.totalCommissions || 0),
+      totalReferralFees: Number(row?.totalReferralFees || 0),
+      netOwnerPayout: Number(row?.netOwnerPayout || 0),
+    };
+  };
+
+  const before = await readOwnerTotals();
+  const day = String((Math.floor(Math.random() * 20) + 1)).padStart(2, '0');
+  const startDate = `2120-01-${day}`;
+  const endDate = `2120-01-${String(Number(day) + 1).padStart(2, '0')}`;
+
+  try {
+    const bookingCreate = await request(app)
+      .post('/api/bookings')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        carId: car.id,
+        customerId: customer.id,
+        startDate,
+        startTime: '09:00',
+        endDate,
+        endTime: '10:00',
+        discountType: 'fixed',
+        discountValue: 0,
+      });
+    assert.equal(bookingCreate.status, 201);
+    createdBookingId = bookingCreate.body.id;
+
+    const bookingAmount = Number(bookingCreate.body.totalAmount || 0);
+    const officeCommission = Number(bookingCreate.body.officeCommissionAmount || 0);
+    const referralFee = bookingCreate.body.isOutsider ? Number(bookingCreate.body.referralFeeAmount || 0) : 0;
+    const ownerNet = bookingAmount - officeCommission - referralFee;
+
+    const afterCreate = await readOwnerTotals();
+    assert.equal(round2(afterCreate.grossTotal), round2(before.grossTotal + bookingAmount));
+    assert.equal(round2(afterCreate.totalCommissions), round2(before.totalCommissions + officeCommission));
+    assert.equal(round2(afterCreate.totalReferralFees), round2(before.totalReferralFees + referralFee));
+    assert.equal(round2(afterCreate.netOwnerPayout), round2(before.netOwnerPayout + ownerNet));
+  } finally {
+    if (createdBookingId) {
+      const cleanup = await request(app)
+        .delete(`/api/bookings/${createdBookingId}`)
+        .set('Authorization', `Bearer ${authToken}`);
+      assert.equal(cleanup.status, 200);
+    }
+  }
+
+  const afterDelete = await readOwnerTotals();
+  assert.equal(round2(afterDelete.grossTotal), round2(before.grossTotal));
+  assert.equal(round2(afterDelete.totalCommissions), round2(before.totalCommissions));
+  assert.equal(round2(afterDelete.totalReferralFees), round2(before.totalReferralFees));
+  assert.equal(round2(afterDelete.netOwnerPayout), round2(before.netOwnerPayout));
+});
+
 test('transactions: create/list/delete expense flow', async () => {
   const transactionDate = '2105-01-15';
   const carsRes = await request(app).get('/api/cars').set('Authorization', `Bearer ${authToken}`);
@@ -95,6 +189,44 @@ test('transactions: create/list/delete expense flow', async () => {
     .set('Authorization', `Bearer ${authToken}`);
   assert.equal(deleted.status, 200);
   assert.equal(deleted.body.success, true);
+});
+
+test('office expense without car is allowed and increases office expenses KPI', async () => {
+  const baseSummary = await request(app)
+    .get('/api/finance/office-summary')
+    .set('Authorization', `Bearer ${authToken}`);
+  assert.equal(baseSummary.status, 200);
+  const before = Number(baseSummary.body.officeExpenses || 0);
+
+  const transactionDate = '2105-01-16';
+  const amount = 11.75;
+  const created = await request(app)
+    .post('/api/transactions')
+    .set('Authorization', `Bearer ${authToken}`)
+    .send({
+      date: transactionDate,
+      description: 'Office expense without car',
+      type: 'Expense',
+      amount,
+      category: 'Office Operations',
+    });
+
+  assert.equal(created.status, 201);
+  assert.ok(created.body.id);
+  assert.equal(created.body.type, 'Expense');
+  assert.equal(created.body.carId, undefined);
+
+  const updatedSummary = await request(app)
+    .get('/api/finance/office-summary')
+    .set('Authorization', `Bearer ${authToken}`);
+  assert.equal(updatedSummary.status, 200);
+  assert.equal(round2(updatedSummary.body.officeExpenses), round2(before + amount));
+
+  const cleanup = await request(app)
+    .delete(`/api/transactions/${created.body.id}`)
+    .set('Authorization', `Bearer ${authToken}`);
+  assert.equal(cleanup.status, 200);
+  assert.equal(cleanup.body.success, true);
 });
 
 test('bookings revenue is recognized only after payment is marked paid', async () => {
@@ -268,40 +400,49 @@ test('reports/finance applies paid-pending-commission rules', async () => {
   assert.equal(deleteBooking.status, 200);
 });
 
-test('car report includes car-linked expense transactions', async () => {
+test('car report includes referral commission totals per car', async () => {
   const carsRes = await request(app).get('/api/cars').set('Authorization', `Bearer ${authToken}`);
+  const customersRes = await request(app).get('/api/customers').set('Authorization', `Bearer ${authToken}`);
   assert.equal(carsRes.status, 200);
+  assert.equal(customersRes.status, 200);
   assert.ok(Array.isArray(carsRes.body) && carsRes.body.length > 0);
-  const car = carsRes.body[0];
+  assert.ok(Array.isArray(customersRes.body) && customersRes.body.length > 0);
+  const car = carsRes.body.find((c) => c.status === 'Available') || carsRes.body[0];
+  const customer = customersRes.body[0];
 
-  const day = '2103-02-14';
+  const day = `2140-04-${String((Math.floor(Math.random() * 20) + 1)).padStart(2, '0')}`;
+  const referralFeeAmount = 19;
   const baseReport = await request(app)
     .get(`/api/cars/${car.id}/report?period=range&from=${day}&to=${day}`)
     .set('Authorization', `Bearer ${authToken}`);
   assert.equal(baseReport.status, 200);
-  const before = Number(baseReport.body.summary?.totalExpenses || 0);
+  const before = Number(baseReport.body.summary?.totalReferralCommission || 0);
 
-  const expenseCreate = await request(app)
-    .post('/api/transactions')
+  const bookingCreate = await request(app)
+    .post('/api/bookings')
     .set('Authorization', `Bearer ${authToken}`)
     .send({
-      date: day,
-      description: 'Car report expense verification',
-      type: 'Expense',
-      amount: 19,
-      category: 'Maintenance',
+      customerId: customer.id,
       carId: car.id,
+      startDate: day,
+      startTime: '09:00',
+      endDate: day,
+      endTime: '17:00',
+      discountType: 'fixed',
+      discountValue: 0,
+      isOutsider: true,
+      referralFeeAmount,
     });
-  assert.equal(expenseCreate.status, 201);
+  assert.equal(bookingCreate.status, 201);
 
   const updatedReport = await request(app)
     .get(`/api/cars/${car.id}/report?period=range&from=${day}&to=${day}`)
     .set('Authorization', `Bearer ${authToken}`);
   assert.equal(updatedReport.status, 200);
-  assert.equal(Number(updatedReport.body.summary?.totalExpenses || 0), Number((before + 19).toFixed(2)));
+  assert.equal(Number(updatedReport.body.summary?.totalReferralCommission || 0), Number((before + referralFeeAmount).toFixed(2)));
 
   const cleanup = await request(app)
-    .delete(`/api/transactions/${expenseCreate.body.id}`)
+    .delete(`/api/bookings/${bookingCreate.body.id}`)
     .set('Authorization', `Bearer ${authToken}`);
   assert.equal(cleanup.status, 200);
 });

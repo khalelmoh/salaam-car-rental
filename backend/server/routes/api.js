@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { requireRole } from '../middleware/rbac.js';
+import { enforcePasswordRotation } from '../middleware/passwordRotation.js';
 import * as legacyController from '../controllers/apiController.js';
 import * as authController from '../controllers/authController.js';
 import * as bookingController from '../controllers/bookingController.js';
@@ -9,6 +10,7 @@ import * as financeCloseController from '../controllers/financeCloseController.j
 import * as systemController from '../controllers/systemController.js';
 import * as docsController from '../controllers/docsController.js';
 import * as reportController from '../controllers/reportController.js';
+import * as ownerLedgerController from '../controllers/ownerLedgerController.js';
 
 const router = Router();
 
@@ -25,6 +27,7 @@ router.use('/api', requireAuth);
 router.get('/api/auth/me', authController.me);
 router.post('/api/auth/logout', authController.logout);
 router.put('/api/auth/profile', authController.updateProfile);
+router.use('/api', enforcePasswordRotation);
 
 router.get('/api/users', requireRole('admin', 'manager'), legacyController.listUsers);
 router.post('/api/users', requireRole('admin'), legacyController.createUser);
@@ -53,6 +56,8 @@ router.get('/api/transactions', transactionController.listTransactions);
 router.post('/api/transactions', requireRole('admin', 'manager'), transactionController.createTransaction);
 router.put('/api/transactions/:id', requireRole('admin', 'manager'), transactionController.updateTransaction);
 router.delete('/api/transactions/:id', requireRole('admin', 'manager'), transactionController.deleteTransaction);
+router.get('/api/owners/payout-summaries', requireRole('admin', 'manager', 'staff'), ownerLedgerController.listOwnerPayoutSummaries);
+router.get('/api/finance/office-summary', requireRole('admin', 'manager', 'staff'), ownerLedgerController.getOfficeFinanceSummary);
 router.get('/api/finance/close', requireRole('admin', 'manager'), financeCloseController.listCloseOverview);
 router.get('/api/finance/closes', requireRole('admin', 'manager'), financeCloseController.listCloseOverview);
 router.post('/api/finance/close/daily', requireRole('admin', 'manager'), financeCloseController.closeDaily);

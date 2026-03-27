@@ -1,4 +1,4 @@
-import { api, clearAuthToken, setAuthToken } from './api';
+import { api } from './api';
 import type { User } from '../types/models';
 
 const USER_KEY = 'salaam_user';
@@ -18,13 +18,11 @@ export function storeUser(user: User) {
 }
 
 export function clearAuthState() {
-  clearAuthToken();
   localStorage.removeItem(USER_KEY);
 }
 
 export async function login(email: string, password: string) {
   const result = await api.login(email, password);
-  setAuthToken(result.token);
   storeUser(result.user);
   return result.user;
 }

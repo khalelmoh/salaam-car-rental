@@ -5,6 +5,7 @@ import { makeId } from '../services/security.js';
 import { calculateBookingAmounts, toDateTime } from '../services/bookingMath.js';
 import { removeJournalForReference } from '../services/accountingService.js';
 import { hasBookingOverlap, mapBooking, parsePagination, syncBookingIncomePayment } from './common.js';
+import { clearBookingCompletionLedger, processBookingCompletion } from './ownerLedgerController.js';
 
 const bookingCreateSchema = z.object({
   carId: z.string().min(1),
@@ -15,6 +16,9 @@ const bookingCreateSchema = z.object({
   endTime: z.string().regex(/^\d{2}:\d{2}$/).optional().default('23:59'),
   discountType: z.enum(['fixed', 'percent']).optional().default('fixed'),
   discountValue: z.number().min(0).optional().default(0),
+  isOutsider: z.boolean().optional().default(false),
+  officeCommissionAmount: z.number().min(0).optional().default(5),
+  referralFeeAmount: z.number().min(0).optional().default(5),
 });
 
 function toHHMM(value, fallback) {
@@ -97,8 +101,9 @@ export async function createBooking(req, res, next) {
         `INSERT INTO bookings (
           id, car_id, customer_id, start_date, start_time, end_date, end_time,
           discount_type, discount_value, discount_amount, subtotal_amount, total_amount,
+          is_outsider, office_commission_amount, referral_fee_amount,
           status, payment_status, created_by
-        ) VALUES ($1, $2, $3, $4::date, $5::time, $6::date, $7::time, $8, $9, $10, $11, $12, 'reserved', 'pending', $13)`,
+        ) VALUES ($1, $2, $3, $4::date, $5::time, $6::date, $7::time, $8, $9, $10, $11, $12, $13, $14, $15, 'reserved', 'pending', $16)`,
         [
           id,
           payload.carId,
@@ -112,6 +117,9 @@ export async function createBooking(req, res, next) {
           totals.discountAmount,
           totals.subtotalAmount,
           totals.totalAmount,
+          payload.isOutsider,
+          payload.officeCommissionAmount,
+          payload.referralFeeAmount,
           req.auth.userId,
         ]
       );
@@ -129,6 +137,19 @@ export async function createBooking(req, res, next) {
         carResult.rows[0].name,
         req.auth.userId
       );
+
+      // Keep owner payout ledger in sync from the moment a booking is created.
+      if (carResult.rows[0].owner_id) {
+        await processBookingCompletion({
+          bookingId: id,
+          grossAmount: totals.totalAmount,
+          baseOfficeCommission: payload.officeCommissionAmount,
+          isOutsider: payload.isOutsider,
+          referralFee: payload.referralFeeAmount,
+          effectiveDate: payload.startDate,
+          userId: req.auth.userId,
+        });
+      }
 
       await logAudit({
         userId: req.auth.userId,
@@ -217,11 +238,14 @@ export async function updateBooking(req, res, next) {
           discount_amount = $9,
           subtotal_amount = $10,
           total_amount = $11,
-          status = $12,
-          payment_status = $13,
+          is_outsider = $12,
+          office_commission_amount = $13,
+          referral_fee_amount = $14,
+          status = $15,
+          payment_status = $16,
           end_reminder_notified_at = CASE WHEN ($5::date <> end_date OR $6::time <> end_time) THEN NULL ELSE end_reminder_notified_at END,
           overdue_notified_at = CASE WHEN ($5::date <> end_date OR $6::time <> end_time) THEN NULL ELSE overdue_notified_at END
-        WHERE id = $14`,
+        WHERE id = $17`,
         [
           payload.carId,
           payload.customerId,
@@ -234,6 +258,9 @@ export async function updateBooking(req, res, next) {
           totals.discountAmount,
           totals.subtotalAmount,
           totals.totalAmount,
+          payload.isOutsider ?? current.isOutsider ?? false,
+          Number(payload.officeCommissionAmount ?? current.officeCommissionAmount ?? 5),
+          Number(payload.referralFeeAmount ?? current.referralFeeAmount ?? 5),
           payload.status,
           payload.paymentStatus,
           id,
@@ -253,6 +280,20 @@ export async function updateBooking(req, res, next) {
         carResult.rows[0].name,
         req.auth.userId
       );
+
+      if (payload.status === 'cancelled' || !carResult.rows[0].owner_id) {
+        await clearBookingCompletionLedger(id);
+      } else {
+        await processBookingCompletion({
+          bookingId: id,
+          grossAmount: totals.totalAmount,
+          baseOfficeCommission: payload.officeCommissionAmount ?? current.officeCommissionAmount ?? 5,
+          isOutsider: payload.isOutsider ?? current.isOutsider ?? false,
+          referralFee: payload.referralFeeAmount ?? current.referralFeeAmount ?? 5,
+          effectiveDate: payload.startDate,
+          userId: req.auth.userId,
+        });
+      }
 
       await logAudit({ userId: req.auth.userId, action: 'update', entity: 'booking', entityId: id });
       await pool.query('COMMIT');
@@ -275,6 +316,7 @@ export async function deleteBooking(req, res, next) {
 
     await pool.query('BEGIN');
     try {
+      await clearBookingCompletionLedger(id);
       await pool.query('DELETE FROM payments WHERE booking_id = $1', [id]);
       for (const payment of paymentRows.rows) {
         await removeJournalForReference('payment', payment.id);

@@ -14,6 +14,8 @@ import type {
   ManagedCar,
   FinanceReportResponse,
   NotificationItem,
+  OfficeFinanceSummary,
+  OwnerPayoutSummary,
   Transaction,
   User,
 } from '../types/models';
@@ -24,35 +26,21 @@ const RAW_API_BASE =
 const API_BASE = RAW_API_BASE.replace(/\/+$/, '').endsWith('/api')
   ? RAW_API_BASE.replace(/\/+$/, '')
   : `${RAW_API_BASE.replace(/\/+$/, '')}/api`;
-const TOKEN_KEY = 'salaam_token';
-
-export function getAuthToken() {
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function setAuthToken(token: string) {
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function clearAuthToken() {
-  localStorage.removeItem(TOKEN_KEY);
-}
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers || {});
   headers.set('Content-Type', 'application/json');
 
-  const token = getAuthToken();
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-
   let response: Response;
   try {
-    response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    response = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers,
+      credentials: 'include',
+    });
   } catch {
     const hint = import.meta.env.DEV
-      ? 'Start the backend server with "npm run server".'
+      ? `Start the backend server with "npm run server". If it is already running, make sure CORS_ORIGIN allows ${window.location.origin} (or keep ALLOW_LOCALHOST_CORS=true).`
       : 'Make sure `/api` is deployed or set VITE_API_BASE_URL to your backend URL.';
     throw new Error(
       `Cannot reach API at ${API_BASE}. ${hint}`
@@ -194,6 +182,8 @@ export const api = {
     endTime: string;
     discountType?: DiscountType;
     discountValue?: number;
+    isOutsider?: boolean;
+    referralFeeAmount?: number;
   }) {
     return request<Booking>('/bookings', { method: 'POST', body: JSON.stringify(payload) });
   },
@@ -215,6 +205,12 @@ export const api = {
   },
   deleteTransaction(id: string) {
     return request<{ success: boolean }>(`/transactions/${id}`, { method: 'DELETE' });
+  },
+  listOwnerPayoutSummaries() {
+    return request<OwnerPayoutSummary[]>('/owners/payout-summaries');
+  },
+  getOfficeFinanceSummary() {
+    return request<OfficeFinanceSummary>('/finance/office-summary');
   },
   getFinanceReport(params?: {
     from?: string;

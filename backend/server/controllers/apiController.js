@@ -47,6 +47,8 @@ function mapCar(row) {
     id: row.id,
     name: row.name,
     category: row.category,
+    ownerId: row.owner_id || undefined,
+    ownerName: row.owner_name || undefined,
     ownerPhone: row.owner_phone || '',
     image: row.image || '',
     pricePerDay: Number(row.price_per_day),
@@ -58,6 +60,97 @@ function mapCar(row) {
     licensePlate: row.license_plate,
     createdAt: row.created_at,
   };
+}
+
+async function resolveCarOwnerId(client, payload, fallbackOwnerId = null) {
+  const ownerName = String(payload.ownerName ?? payload.owner_name ?? '').trim();
+  const explicitOwnerId = String(payload.ownerId ?? payload.owner_id ?? fallbackOwnerId ?? '').trim();
+  const allowOwnerRename = payload.allowOwnerRename === true || payload.allow_owner_rename === true;
+  const ownerPhone = String(payload.ownerPhone ?? payload.owner_phone ?? '').trim();
+
+  const isPlaceholderOwnerName = (value) => {
+    const normalized = String(value ?? '').trim();
+    return (
+      !normalized ||
+      /^OWN-[A-Za-z0-9_-]+$/.test(normalized) ||
+      /^Owner [0-9]{4}$/.test(normalized)
+    );
+  };
+
+  const findOwnerByName = async (fullName) => {
+    const normalized = String(fullName || '').trim();
+    if (!normalized) return null;
+    const byName = await client.query(
+      `SELECT id, full_name
+       FROM owners
+       WHERE LOWER(TRIM(full_name)) = LOWER(TRIM($1))
+       LIMIT 1`,
+      [normalized]
+    );
+    return byName.rows[0] || null;
+  };
+
+  const canRenameOwner = async (ownerId, currentName) => {
+    if (isPlaceholderOwnerName(currentName)) {
+      return true;
+    }
+    if (!allowOwnerRename) {
+      return false;
+    }
+    const usage = await client.query('SELECT COUNT(*)::int AS count FROM cars WHERE owner_id = $1', [ownerId]);
+    return Number(usage.rows[0]?.count || 0) <= 1;
+  };
+
+  if (explicitOwnerId) {
+    const owner = await client.query('SELECT id, full_name FROM owners WHERE id = $1 LIMIT 1', [explicitOwnerId]);
+    if (!owner.rows[0]) {
+      const error = new Error('Selected owner does not exist.');
+      error.statusCode = 400;
+      throw error;
+    }
+    if (ownerName && ownerName !== owner.rows[0].full_name) {
+      const byName = await findOwnerByName(ownerName);
+      if (byName?.id && byName.id !== explicitOwnerId) {
+        return byName.id;
+      }
+      if (await canRenameOwner(explicitOwnerId, owner.rows[0].full_name)) {
+        await client.query('UPDATE owners SET full_name = $1, updated_at = NOW() WHERE id = $2', [ownerName, explicitOwnerId]);
+      }
+    }
+    return explicitOwnerId;
+  }
+
+  if (!ownerPhone) {
+    const byName = await findOwnerByName(ownerName);
+    return byName?.id || fallbackOwnerId || null;
+  }
+
+  const existingOwner = await client.query('SELECT id, full_name FROM owners WHERE phone = $1 LIMIT 1', [ownerPhone]);
+  if (existingOwner.rows[0]?.id) {
+    if (ownerName && ownerName !== existingOwner.rows[0].full_name) {
+      const byName = await findOwnerByName(ownerName);
+      if (byName?.id && byName.id !== existingOwner.rows[0].id) {
+        return byName.id;
+      }
+      if (await canRenameOwner(existingOwner.rows[0].id, existingOwner.rows[0].full_name)) {
+        await client.query('UPDATE owners SET full_name = $1, updated_at = NOW() WHERE id = $2', [ownerName, existingOwner.rows[0].id]);
+      }
+    }
+    return existingOwner.rows[0].id;
+  }
+
+  const ownerId = makeId('OWN');
+  await client.query(
+    `INSERT INTO owners (id, full_name, phone, email)
+     VALUES ($1, $2, $3, $4)`,
+    [
+      ownerId,
+      ownerName || `Owner ${ownerPhone.slice(-4) || '0000'}`,
+      ownerPhone,
+      payload.ownerEmail || null,
+    ]
+  );
+  return ownerId;
 }
 
 function mapCustomer(row) {
@@ -431,13 +524,22 @@ export async function listCars(req, res, next) {
   try {
     const pagination = parsePagination(req.query);
     if (!pagination.paged) {
-      const { rows } = await pool.query('SELECT * FROM cars ORDER BY created_at DESC');
+      const { rows } = await pool.query(
+        `SELECT c.*, o.full_name AS owner_name
+         FROM cars c
+         LEFT JOIN owners o ON o.id = c.owner_id
+         ORDER BY c.created_at DESC`
+      );
       return res.json(rows.map(mapCar));
     }
 
     const count = await pool.query('SELECT COUNT(*)::int AS count FROM cars');
     const { rows } = await pool.query(
-      'SELECT * FROM cars ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+      `SELECT c.*, o.full_name AS owner_name
+       FROM cars c
+       LEFT JOIN owners o ON o.id = c.owner_id
+       ORDER BY c.created_at DESC
+       LIMIT $1 OFFSET $2`,
       [pagination.pageSize, (pagination.page - 1) * pagination.pageSize]
     );
     return res.json({
@@ -465,15 +567,17 @@ export async function createCar(req, res, next) {
     }
 
     const id = makeId('CAR');
+    const ownerId = await resolveCarOwnerId(pool, body, null);
     await pool.query(
       `INSERT INTO cars (
-        id, branch_id, name, category, owner_phone, image, price_per_day, transmission, seats,
+        id, branch_id, name, category, owner_id, owner_phone, image, price_per_day, transmission, seats,
         fuel_type, mpg, status, license_plate
-      ) VALUES ($1, 'BR-001', $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      ) VALUES ($1, 'BR-001', $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
       [
         id,
         body.name,
         body.category,
+        ownerId,
         body.ownerPhone || '',
         body.image || '',
         Number(body.pricePerDay),
@@ -486,7 +590,13 @@ export async function createCar(req, res, next) {
       ]
     );
 
-    const created = await pool.query('SELECT * FROM cars WHERE id = $1', [id]);
+    const created = await pool.query(
+      `SELECT c.*, o.full_name AS owner_name
+       FROM cars c
+       LEFT JOIN owners o ON o.id = c.owner_id
+       WHERE c.id = $1`,
+      [id]
+    );
     await logAudit({ userId: req.auth.userId, action: 'create', entity: 'car', entityId: id });
     res.status(201).json(mapCar(created.rows[0]));
   } catch (error) {
@@ -504,14 +614,16 @@ export async function updateCar(req, res, next) {
     if (!existing.rows[0]) return res.status(404).json({ error: 'Vehicle not found.' });
 
     const payload = { ...existing.rows[0], ...(req.body || {}) };
+    const ownerId = await resolveCarOwnerId(pool, payload, existing.rows[0].owner_id || null);
     await pool.query(
       `UPDATE cars SET
-        name = $1, category = $2, owner_phone = $3, image = $4, price_per_day = $5,
-        transmission = $6, seats = $7, fuel_type = $8, mpg = $9, status = $10, license_plate = $11
-       WHERE id = $12`,
+        name = $1, category = $2, owner_id = $3, owner_phone = $4, image = $5, price_per_day = $6,
+        transmission = $7, seats = $8, fuel_type = $9, mpg = $10, status = $11, license_plate = $12
+       WHERE id = $13`,
       [
         payload.name,
         payload.category,
+        ownerId,
         payload.ownerPhone ?? payload.owner_phone ?? '',
         payload.image || '',
         Number(payload.pricePerDay ?? payload.price_per_day),
@@ -525,7 +637,13 @@ export async function updateCar(req, res, next) {
       ]
     );
 
-    const updated = await pool.query('SELECT * FROM cars WHERE id = $1', [id]);
+    const updated = await pool.query(
+      `SELECT c.*, o.full_name AS owner_name
+       FROM cars c
+       LEFT JOIN owners o ON o.id = c.owner_id
+       WHERE c.id = $1`,
+      [id]
+    );
     await logAudit({ userId: req.auth.userId, action: 'update', entity: 'car', entityId: id });
     res.json(mapCar(updated.rows[0]));
   } catch (error) {

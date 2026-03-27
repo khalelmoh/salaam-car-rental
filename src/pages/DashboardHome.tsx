@@ -217,17 +217,18 @@ const DashboardHome = () => {
         setIsLoading(true);
       }
       try {
-        const [data, transactions, bookings] = await Promise.all([
+        const [data, transactions, bookings, officeSummary] = await Promise.all([
           api.getDashboard(),
           api.listTransactions(),
           api.listBookings(),
+          api.getOfficeFinanceSummary(),
         ]);
         const paidRevenue = derivePaidRevenue(transactions, bookings);
         if (active) {
           setDailyRevenue(paidRevenue.dailyRevenue);
           setDashboard({
             ...data,
-            totalRevenue: paidRevenue.totalRevenue,
+            totalRevenue: Number(officeSummary.officeIncome || 0),
             revenueData: paidRevenue.revenueData,
           });
         }

@@ -56,6 +56,16 @@ function mapRoleName(value) {
   return 'staff';
 }
 
+function isTestEnv() {
+  return String(process.env.NODE_ENV || '').toLowerCase() === 'test';
+}
+
+function resolveBootstrapPassword() {
+  const configured = String(process.env.ADMIN_BOOTSTRAP_PASSWORD || '').trim();
+  if (configured) return configured;
+  return 'admin';
+}
+
 export async function seedFromLegacyIfEmpty() {
   if (await alreadySeeded()) {
     return;
@@ -71,8 +81,8 @@ export async function seedFromLegacyIfEmpty() {
     for (const user of legacy.users || []) {
       const roleName = mapRoleName(user.role);
       await pool.query(
-        `INSERT INTO users (id, name, username, email, password_hash, role_id, title, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8::timestamptz, NOW()))
+        `INSERT INTO users (id, name, username, email, password_hash, must_change_password, role_id, title, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, COALESCE($9::timestamptz, NOW()))
          ON CONFLICT (id) DO NOTHING`,
         [
           user.id,
@@ -80,6 +90,7 @@ export async function seedFromLegacyIfEmpty() {
           user.username || null,
           String(user.email || '').toLowerCase(),
           user.passwordHash || user.password || '',
+          false,
           roleIdByName.get(roleName),
           user.title || '',
           user.createdAt || null,
@@ -87,13 +98,15 @@ export async function seedFromLegacyIfEmpty() {
       );
     }
 
-    // Keep a predictable default credential for initial local bootstrap.
-    const adminHash = await bcrypt.hash('admin', 12);
+    // Reset bootstrap admin credentials during first seed only.
+    const adminHash = await bcrypt.hash(resolveBootstrapPassword(), 12);
+    const mustChangePassword = !isTestEnv();
     await pool.query(
       `UPDATE users
-       SET password_hash = $1
+       SET password_hash = $1,
+           must_change_password = $2
        WHERE LOWER(email) = 'admin@salaam.com'`,
-      [adminHash]
+      [adminHash, mustChangePassword]
     );
 
     const reservedPlates = new Set();
@@ -265,16 +278,29 @@ export async function seedFromLegacyIfEmpty() {
 
 export async function ensureAdminBootstrapPassword() {
   const { rows } = await pool.query(
-    `SELECT id, password_hash
+    `SELECT id, password_hash, must_change_password
      FROM users
      WHERE LOWER(email) = 'admin@salaam.com'
      LIMIT 1`
   );
   if (!rows[0]) return;
 
-  const current = String(rows[0].password_hash || '');
-  if (current.startsWith('$2')) return;
+  const row = rows[0];
+  const current = String(row.password_hash || '');
+  const mustChangePassword = !isTestEnv();
 
-  const adminHash = await bcrypt.hash('admin', 12);
-  await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [adminHash, rows[0].id]);
+  if (!current.startsWith('$2')) {
+    const adminHash = await bcrypt.hash(resolveBootstrapPassword(), 12);
+    await pool.query(
+      'UPDATE users SET password_hash = $1, must_change_password = $2 WHERE id = $3',
+      [adminHash, mustChangePassword, row.id]
+    );
+    return;
+  }
+
+  const usesLegacyDefault = await bcrypt.compare('admin', current);
+  const shouldRequireRotation = mustChangePassword && usesLegacyDefault;
+  if (Boolean(row.must_change_password) !== shouldRequireRotation) {
+    await pool.query('UPDATE users SET must_change_password = $1 WHERE id = $2', [shouldRequireRotation, row.id]);
+  }
 }

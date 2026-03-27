@@ -25,6 +25,7 @@ export async function runMigrations() {
       username TEXT,
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
+      must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
       role_id INTEGER NOT NULL REFERENCES roles(id),
       title TEXT DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -244,6 +245,126 @@ export async function runMigrations() {
     await pool.query(`
     ALTER TABLE customers
     ADD COLUMN IF NOT EXISTS damiin_name TEXT NOT NULL DEFAULT '';
+  `);
+
+    await pool.query(`
+    ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN NOT NULL DEFAULT FALSE;
+  `);
+
+    await pool.query(`
+    CREATE TABLE IF NOT EXISTS owners (
+      id TEXT PRIMARY KEY,
+      full_name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      email TEXT,
+      payout_account TEXT DEFAULT '',
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+    await pool.query(`
+    ALTER TABLE cars
+    ADD COLUMN IF NOT EXISTS owner_id TEXT REFERENCES owners(id) ON DELETE SET NULL;
+  `);
+
+    await pool.query(`
+    ALTER TABLE bookings
+    ADD COLUMN IF NOT EXISTS is_outsider BOOLEAN NOT NULL DEFAULT FALSE;
+  `);
+
+    await pool.query(`
+    ALTER TABLE bookings
+    ADD COLUMN IF NOT EXISTS office_commission_amount NUMERIC(12,2) NOT NULL DEFAULT 5 CHECK (office_commission_amount >= 0);
+  `);
+
+    await pool.query(`
+    ALTER TABLE bookings
+    ADD COLUMN IF NOT EXISTS referral_fee_amount NUMERIC(12,2) NOT NULL DEFAULT 5 CHECK (referral_fee_amount >= 0);
+  `);
+
+    await pool.query(`
+    CREATE TABLE IF NOT EXISTS owner_ledger_transactions (
+      id TEXT PRIMARY KEY,
+      owner_id TEXT NOT NULL REFERENCES owners(id) ON DELETE RESTRICT,
+      vehicle_id TEXT REFERENCES cars(id) ON DELETE SET NULL,
+      booking_id TEXT REFERENCES bookings(id) ON DELETE SET NULL,
+      category TEXT NOT NULL CHECK (category IN ('RENTAL_INCOME', 'OFFICE_COMMISSION', 'REFERRAL_FEE', 'MAINTENANCE_DEDUCTION')),
+      entry_direction TEXT NOT NULL CHECK (entry_direction IN ('credit', 'debit')),
+      amount NUMERIC(14,2) NOT NULL CHECK (amount > 0),
+      effective_date DATE NOT NULL DEFAULT CURRENT_DATE,
+      note TEXT NOT NULL DEFAULT '',
+      metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_by TEXT REFERENCES users(id) ON DELETE SET NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+    await pool.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_owners_phone ON owners(phone);
+    CREATE INDEX IF NOT EXISTS idx_cars_owner_id ON cars(owner_id);
+    CREATE INDEX IF NOT EXISTS idx_owner_ledger_owner_date ON owner_ledger_transactions(owner_id, effective_date DESC);
+    CREATE INDEX IF NOT EXISTS idx_owner_ledger_booking_id ON owner_ledger_transactions(booking_id);
+    CREATE INDEX IF NOT EXISTS idx_owner_ledger_category ON owner_ledger_transactions(category);
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_owner_ledger_booking_category
+      ON owner_ledger_transactions(booking_id, category)
+      WHERE booking_id IS NOT NULL;
+  `);
+
+    await pool.query(`
+    INSERT INTO owners (id, full_name, phone)
+    SELECT
+      'OWN-' || SUBSTRING(md5(owner_phone) FROM 1 FOR 10) AS id,
+      'Owner ' || RIGHT(owner_phone, 4) AS full_name,
+      owner_phone
+    FROM cars
+    WHERE COALESCE(TRIM(owner_phone), '') <> ''
+    ON CONFLICT (phone) DO NOTHING;
+  `);
+
+    await pool.query(`
+    UPDATE cars
+    SET owner_id = 'OWN-' || SUBSTRING(md5(owner_phone) FROM 1 FOR 10)
+    WHERE owner_id IS NULL AND COALESCE(TRIM(owner_phone), '') <> '';
+  `);
+
+    await pool.query(`
+    UPDATE owners o
+    SET full_name = src.owner_name,
+        updated_at = NOW()
+    FROM (
+      SELECT owner_id, MAX(NULLIF(TRIM(category), '')) AS owner_name
+      FROM cars
+      WHERE owner_id IS NOT NULL
+        AND COALESCE(NULLIF(TRIM(category), ''), '') <> ''
+      GROUP BY owner_id
+    ) AS src
+    WHERE o.id = src.owner_id
+      AND (
+        COALESCE(NULLIF(TRIM(o.full_name), ''), '') = ''
+        OR o.full_name ~ '^OWN-[A-Za-z0-9_-]+$'
+        OR o.full_name ~ '^Owner [0-9]{4}$'
+      );
+  `);
+
+    await pool.query(`
+    CREATE OR REPLACE VIEW owner_payout_summaries AS
+    SELECT
+      o.id AS owner_id,
+      o.full_name AS owner_name,
+      COALESCE(SUM(CASE WHEN olt.category = 'RENTAL_INCOME' THEN olt.amount ELSE 0 END), 0)::NUMERIC(14,2) AS gross_total,
+      COALESCE(SUM(CASE WHEN olt.category = 'OFFICE_COMMISSION' THEN olt.amount ELSE 0 END), 0)::NUMERIC(14,2) AS total_commissions,
+      COALESCE(SUM(CASE WHEN olt.category = 'REFERRAL_FEE' THEN olt.amount ELSE 0 END), 0)::NUMERIC(14,2) AS total_referral_fees,
+      COALESCE(SUM(CASE WHEN olt.category = 'MAINTENANCE_DEDUCTION' THEN olt.amount ELSE 0 END), 0)::NUMERIC(14,2) AS total_maintenance_deductions,
+      (
+        COALESCE(SUM(CASE WHEN olt.category = 'RENTAL_INCOME' THEN olt.amount ELSE 0 END), 0)
+        - COALESCE(SUM(CASE WHEN olt.category IN ('OFFICE_COMMISSION', 'REFERRAL_FEE', 'MAINTENANCE_DEDUCTION') THEN olt.amount ELSE 0 END), 0)
+      )::NUMERIC(14,2) AS net_owner_payout
+    FROM owners o
+    LEFT JOIN owner_ledger_transactions olt ON olt.owner_id = o.id
+    GROUP BY o.id, o.full_name;
   `);
 
     await pool.query(`
