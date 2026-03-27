@@ -269,7 +269,7 @@ const DashboardHome = () => {
               <Car size={18} />
             </div>
             <div className="overview-metric-copy">
-              <p>Total Fleet:</p>
+              <p>Total Vehicles:</p>
               <h3>{dashboard?.totalFleet ?? 0}</h3>
               <span className="overview-pill">+12% vs last month</span>
             </div>
