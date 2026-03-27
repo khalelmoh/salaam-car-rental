@@ -287,10 +287,25 @@ export async function ensureAdminBootstrapPassword() {
 
   const row = rows[0];
   const current = String(row.password_hash || '');
+  const bootstrapPassword = resolveBootstrapPassword();
   const mustChangePassword = !isTestEnv();
 
+  // Keep tests deterministic even against long-lived local databases.
+  if (isTestEnv()) {
+    const isAlreadyBootstrapHash =
+      current.startsWith('$2') && (await bcrypt.compare(bootstrapPassword, current));
+    if (!isAlreadyBootstrapHash || Boolean(row.must_change_password)) {
+      const adminHash = await bcrypt.hash(bootstrapPassword, 12);
+      await pool.query(
+        'UPDATE users SET password_hash = $1, must_change_password = false WHERE id = $2',
+        [adminHash, row.id]
+      );
+    }
+    return;
+  }
+
   if (!current.startsWith('$2')) {
-    const adminHash = await bcrypt.hash(resolveBootstrapPassword(), 12);
+    const adminHash = await bcrypt.hash(bootstrapPassword, 12);
     await pool.query(
       'UPDATE users SET password_hash = $1, must_change_password = $2 WHERE id = $3',
       [adminHash, mustChangePassword, row.id]

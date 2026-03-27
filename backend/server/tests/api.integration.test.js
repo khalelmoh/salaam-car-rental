@@ -6,6 +6,8 @@ import { initializeBackend } from '../startup.js';
 
 let app;
 let authToken = '';
+const adminEmail = 'admin@salaam.com';
+const adminPassword = String(process.env.ADMIN_BOOTSTRAP_PASSWORD || 'admin');
 
 const round2 = (value) => Number(Number(value || 0).toFixed(2));
 
@@ -32,8 +34,8 @@ before(async () => {
   app = createApp();
 
   const login = await request(app).post('/api/auth/login').send({
-    email: 'admin@salaam.com',
-    password: 'admin',
+    email: adminEmail,
+    password: adminPassword,
   });
 
   assert.equal(login.status, 200);
@@ -43,13 +45,13 @@ before(async () => {
 
 test('auth: login returns token and user payload', async () => {
   const response = await request(app).post('/api/auth/login').send({
-    email: 'admin@salaam.com',
-    password: 'admin',
+    email: adminEmail,
+    password: adminPassword,
   });
 
   assert.equal(response.status, 200);
   assert.ok(response.body.token);
-  assert.equal(response.body.user.email, 'admin@salaam.com');
+  assert.equal(response.body.user.email, adminEmail);
 });
 
 test('bookings: rejects invalid payload', async () => {
