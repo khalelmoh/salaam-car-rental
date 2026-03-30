@@ -554,7 +554,6 @@ const FinanceManager = () => {
                   <span>Deductions: ${owner.deductions.toLocaleString()}</span>
                   <span>Office Comm: ${owner.commissions.toLocaleString()}</span>
                   <span>Referral Commision: ${owner.referralFees.toLocaleString()}</span>
-                  <span>Maintenance: ${owner.maintenance.toLocaleString()}</span>
                 </div>
                 <div className="owner-finance-actions no-print">
                   <Button
